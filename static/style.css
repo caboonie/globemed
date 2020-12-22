@@ -1,0 +1,36 @@
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: lightgrey;
+  padding: 10px;
+  color: grey;
+  text-align: center;
+}
+
+th {
+	padding: 5px;
+	border: 1px solid black;
+}
+
+td {
+	padding: 5px;
+	border: 1px solid black;
+}
+
+.task-type {
+	color: blue;
+
+}
+
+.task-type:hover {
+	font-weight: bold;
+	cursor: pointer;
+	
+}
+
+.navbar {
+	padding-left: 10px;
+	padding-right: 20px;
+}

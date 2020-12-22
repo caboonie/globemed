@@ -1,0 +1,131 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <!-- <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet"> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>GlobeMed Site</title>
+
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <!-- <link rel="stylesheet" href="{{url_for('static', filename='w3.css')}}"> -->
+  <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+  
+</head>
+
+<body>
+  <!-- <script src="//code.jquery.com/jquery-latest.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> -->
+
+  <nav class="navbar navbar-inverse navbar-fixed-top">
+    <!-- <div class="container"> -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">
+          <img alt="Brand Logo" src="{{url_for('static', filename='brand_logo.png')}}" style="max-height: 100%;">
+        </a>
+        <ul class="nav navbar-nav">
+          <li><a href = "{{url_for('tasks')}}">Tasks</a></li>
+          <li><a href = "{{url_for('add_task')}}">Add Task</a></li>
+        </ul>
+      </div>
+
+      <div class="collapse navbar-collapse" id="navbar-collapse-1">
+        <ul class="nav navbar-nav navbar-left flags">
+          <!-- <div class="flags"> -->
+          <!-- </div> -->
+        </ul>
+
+        <div class="navbar-right">
+   
+        {% if 'id' in session %}
+          <div class="navbar-text" id="userbox">
+            
+           
+              You are currently signed in as <strong>{{session['username']}}</strong>
+              </div>
+              <ul class="nav navbar-nav">
+                <li><a href = "{{url_for('logout')}}">Log Out</a></li>
+              </ul>
+
+
+            {%if session['is_admin']%}
+                <ul class="nav navbar-nav">
+                  <li><a href = "{{url_for('dashboard')}}">Dashboard</a></li>
+                </ul>
+            {%endif%}
+
+            
+        {%else%}
+           
+
+        {%endif%}
+        </div>
+
+      </div>
+
+    <!-- </div> -->
+  </nav>
+
+  <!-- Title Container -->
+  <div class="logo">
+    <!-- <img src = "{{url_for('static', filename='meet_logo_1.png')}}" alt="Meet_Logoredv" style="max-height: 50px;"> -->
+   
+    <h2>GlobeMed Title</h2>
+  </div>
+  <!-- End Title Container -->
+
+ 
+    <!--Flash Messaging --> 
+    {% with messages = get_flashed_messages() %}
+      <!-- {% if messages %} -->
+      <div class="alert alert-info alert-dismissible message" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="text-align: right"><span aria-hidden="true">&times;</span></button>
+
+          {% for message in messages %}
+            <strong> {{ message }} </strong><br>
+          {% endfor %}
+        </ul>
+
+      </div>
+      <!-- {% endif %} -->
+
+<!--       <script>
+        $(".alert-dismissible").fadeTo(2000, 500).slideUp(500, function(){
+            $(".alert-dismissible").alert('close');
+        });
+      </script> -->
+    {% endwith %}  		
+    <!-- End FLash Messaging --> 
+
+  <!-- </div>  -->
+
+
+  <!-- Body -->
+  <div style="margin-left: 30px; margin-right: 30px;">
+  {% block body %}
+
+  {% endblock %}
+  </div>
+  <!-- End Body -->
+  
+  
+  <div class="footer">
+    <span> Footer Here </span>
+<!-- 
+    <a href="http://meet.mit.edu"><img class="footer" src="{{url_for('static', filename='meet_logo_21.png')}}" height=40px></a>
+    <img class="footer" src="{{url_for('static', filename='Y3Accelerator1.png')}}" height=100px>
+    <img class="footer" src="{{url_for('static', filename='usaid1.png')}}" height=110px> -->
+  </div>
+
+</body>
+</html>
