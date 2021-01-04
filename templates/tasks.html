@@ -12,7 +12,7 @@
 			<th> Type <button onclick="sortTable(1)">^</button> <button onclick="sortTable(1, true)">v</button></th>
 			<th>Description <button onclick="sortTable(2)">^</button> <button onclick="sortTable(2, true)">v</button></th>
 			{% for col in col_strings %}
-				<th> {{ col }} <button onclick="sortTable( {{loop.index+3}} )">^</button> <button onclick="sortTable({{loop.index+3}}, true)">v</button></th>
+				<th> {{ col }} <button onclick="sortTable( {{loop.index+2}} )">^</button> <button onclick="sortTable({{loop.index+2}}, true)">v</button></th>
 			{% endfor %}
 	        
 	    </tr>
@@ -35,6 +35,7 @@
 
 <script>
 function sortTable(index, reverse=false) {
+  console.log("sorting index", index);
   var table, rows, switching, i, x, y, shouldSwitch;
   table = document.getElementById("task-table");
   switching = true;
