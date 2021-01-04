@@ -3,7 +3,58 @@
 {% block body %}
 
 	<h1>Add Task</h1>
-<!-- div for each type and based on javascript, fade in the appropriate fields for that task  -->
+<!-- div for each type and based on javascript, fade in the appropriate fields for that task 
+ -->
 
+ <script type="text/javascript">
+  	previous_container = null;
+
+  	
+  	function updateFields() {
+  		console.log("called update")
+  		var type_input = jQuery("#task_type")
+  		var container = jQuery("#container_" + type_input.val())
+  		
+  		if (!(previous_container == null)){
+  			previous_container.css("display", "none")
+  		}
+  		container.css("display", "block")
+  		previous_container = container
+  	}
+
+  </script>
+
+<form action="{{ url_for('add_task') }}" method = 'post'>
+	<label for="task_type">Task type:</label>
+  <h3>Choose a task type:</h3>
+  <select id="task_type" name="task_type" onchange="updateFields()">
+  	<option value=""></option>
+  	{% for task_type in task_types %}
+	    <option value="{{task_type.task_type}}">{{task_type.task_type}}</option>
+    {% endfor %}
+  </select>
+
+  <!-- I want the value of this select to cause one of -->
+
+  {% for task_type in task_types %}
+	  <div class="form-group" id="container_{{task_type.task_type}}" style="display: none">
+	  	
+	  	<div>Required Fields:</div>
+	  	<label for="due_date">Due date:</label><input type="date" id="due_date" name="due_date">
+	  	{% for field in task_type.required_fields %}
+	  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
+	  	{% endfor %}
+
+	  	<div>Optional Fields:</div>
+	  	{% for field in task_type.optional_fields %}
+	  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
+	  	{% endfor %}
+	  </div>
+  {% endfor %}
+
+  	
+  </form>
+
+  
 
 {%endblock%}

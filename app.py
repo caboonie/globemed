@@ -56,7 +56,7 @@ def logout():
 @app.route('/dashboard')
 @check_login_wrapper
 def dashboard():
-    return render_template("dashboard.html")
+    return render_template("dashboard.html", task_types = get_task_types())
 
 @app.route("/add_user", methods = ['POST'])
 @check_login_wrapper
@@ -76,6 +76,27 @@ def add_user():
     create_user(username, password, is_admin)
     return redirect(url_for('dashboard'))
 
+@app.route('/add_task_type',  methods = ['POST'])
+@check_login_wrapper
+def add_task_type():
+    print("form", request.form)
+    task_type = request.form['task_type']
+    required_fields = []
+    optional_fields = []
+    for field in request.form:
+        if field in ["task_type"] or "required" in field or request.form[field] == "":
+            continue
+        else:
+            count = field.split("_")[1]
+            if "required_"+count in request.form:
+                required_fields.append(request.form[field])
+            else:
+                optional_fields.append(request.form[field])
+    create_task_type(task_type, required_fields, optional_fields)
+    flash("Task Type: " + task_type + " created!")
+
+    return redirect(url_for('dashboard'))
+
 @app.route('/tasks')
 @check_login_wrapper
 def tasks():
@@ -90,7 +111,7 @@ def task(task_id):
 @check_login_wrapper
 def add_task():
     if request.method == 'GET':
-        return render_template("add_task.html")
+        return render_template("add_task.html", task_types=get_task_types())
     else:
         pass
 

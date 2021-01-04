@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Float
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Float, PickleType
 from sqlalchemy.ext.declarative import declarative_base
 from flask_login import UserMixin
 from passlib.apps import custom_app_context as pwd_security
@@ -28,12 +28,11 @@ class Task(Base):
     due_datetime = Column(DateTime)
     due_datestring = Column(String)
     description = Column(String)
+    fields = Column(PickleType) # dictionary of strings to strings
 
-class Appointment(Task):
-    patient_name = Column(String)
-
-class Prescription(Task):
-    product_name = Column(String)
-    amount = Column(Float)
-    units = Column(String)
-    
+class TaskType(Base):
+    __tablename__ = "task_types"
+    id = Column(Integer, primary_key=True)
+    task_type = Column(String)
+    required_fields = Column(PickleType) # list of strings that are required keys in the fields entry of a task
+    optional_fields = Column(PickleType) # list of strings that are allowed but not required keys in the fields entry of a task
