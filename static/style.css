@@ -1,5 +1,5 @@
 .footer {
-  position: fixed;
+  /*position: fixed;*/
   left: 0;
   bottom: 0;
   width: 100%;
@@ -7,6 +7,11 @@
   padding: 10px;
   color: grey;
   text-align: center;
+
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 4rem;            /* Footer height */
 }
 
 th {
@@ -33,4 +38,40 @@ td {
 .navbar {
 	padding-left: 10px;
 	padding-right: 20px;
+}
+
+.desc-col {
+	width: 150px;
+	max-height: 20px;
+}
+
+.task-row {
+	max-height: 20px;
+	white-space: nowrap;
+}
+
+/* Tooltip container */
+.tooltip2 {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip2 .tooltiptext {
+  visibility: hidden;
+  background-color: black;
+  max-width: 300px;
+  white-space: normal;
+  color: #fff;
+  padding: 5px;
+  border-radius: 6px;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 10;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip2:hover .tooltiptext {
+  visibility: visible;
 }

@@ -4,24 +4,72 @@
 
 	<h1>Task Overview</h1>
 
-	<table>
+	<p><button onclick="sortTable(0)">Sort</button></p>
+
+	<table id="task-table">
 		<tr>
-			<th> Type </th>
+			<th> Id  </th>
+			<th> Type <button onclick="sortTable(1)">^</button> <button onclick="sortTable(1, true)">v</button></th>
+			<th>Description <button onclick="sortTable(2)">^</button> <button onclick="sortTable(2, true)">v</button></th>
 			{% for col in col_strings %}
-				<th> {{ col }} </th>
+				<th> {{ col }} <button onclick="sortTable( {{loop.index+3}} )">^</button> <button onclick="sortTable({{loop.index+3}}, true)">v</button></th>
 			{% endfor %}
 	        
 	    </tr>
 	{% for task in tasks %}
-		<tr>
-			<td><a href="/task/{{task.id}}"> {{ task.task_type }} </a></td>
-	        <!-- <td> {{ task.description }} </td>
-	        <td> {{ task.due_datestring }} </td> -->
+		<tr class="task-row">
+			<td><a href="/task/{{task.id}}"> {{ task.id }} </a></td>
+			<td> {{ task.task_type }} </td>
+			{% if task.description|length > 20 %}
+		        <td class="desc-col"> {{ task.description[:20] }} <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></td>
+		    {% else %}
+		    	<td class="desc-col"> {{ task.description }} </td>
+		    {% endif %}
+	        <!-- <td> {{ task.due_datestring }} </td> -->
 	        {% for col in col_vars %}
 				<td> {{ task[col] }} </td>
 			{% endfor %}
 	    </tr>
     {% endfor %}
     </table>
+
+<script>
+function sortTable(index, reverse=false) {
+  var table, rows, switching, i, x, y, shouldSwitch;
+  table = document.getElementById("task-table");
+  switching = true;
+  /*Make a loop that will continue until
+  no switching has been done:*/
+  while (switching) {
+  	console.log("here");
+    //start by saying: no switching is done:
+    switching = false;
+    rows = table.rows;
+    /*Loop through all table rows (except the
+    first, which contains table headers):*/
+    for (i = 1; i < (rows.length - 1); i++) {
+      //start by saying there should be no switching:
+      shouldSwitch = false;
+      /*Get the two elements you want to compare,
+      one from current row and one from the next:*/
+      x = rows[i].getElementsByTagName("TD")[index];
+      y = rows[i + 1].getElementsByTagName("TD")[index];
+      //check if the two rows should switch place:
+      if (((x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) && !reverse) || ( reverse &&  (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) ) ) {
+      	console.log("comparing", x.innerHTML.toLowerCase(), y.innerHTML.toLowerCase())
+        //if so, mark as a switch and break the loop:
+        shouldSwitch = true;
+        break;
+      }
+    }
+    if (shouldSwitch) {
+      /*If a switch has been marked, make the switch
+      and mark that a switch has been done:*/
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+    }
+  }
+}
+</script>
 
 {%endblock%}

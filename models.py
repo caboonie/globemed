@@ -28,7 +28,11 @@ class Task(Base):
     due_datetime = Column(DateTime)
     due_datestring = Column(String)
     description = Column(String)
+
+class Appointment(Task):
     patient_name = Column(String)
+
+class Prescription(Task):
     product_name = Column(String)
     amount = Column(Float)
     units = Column(String)

@@ -79,7 +79,7 @@ def add_user():
 @app.route('/tasks')
 @check_login_wrapper
 def tasks():
-    return render_template("tasks.html", tasks=get_tasks(), col_strings = ["Description", "Due Date"], col_vars = ["description", "due_datestring"])
+    return render_template("tasks.html", tasks=get_tasks(), col_strings = ["Due Date"], col_vars = ["due_datestring"])
 
 @app.route('/task/<int:task_id>')
 @check_login_wrapper
@@ -97,7 +97,14 @@ def add_task():
 @app.route('/search',  methods = ['GET', 'POST'])
 @check_login_wrapper
 def search():
-    search_text = request.form['search_text']
+    if request.method == 'GET':
+        return render_template("tasks.html")
+    else:
+
+        search_text = request.form['search']
+        print(search_text)
+        # return render_template("search_result.html", tasks=search_descr(search_text))
+        return render_template("tasks.html", tasks=search_descr(search_text), col_strings = ["Due Date"], col_vars = ["due_datestring"])
     # tokenize search texts, then return results sorted in order of number of matches
     # can make a more advanced search - only searching in description, task_type, patient_name entries, etc
 
