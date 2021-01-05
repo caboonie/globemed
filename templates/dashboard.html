@@ -23,11 +23,13 @@
   </form>
 
 
-  <h2>Task Types</h2>
+  <h2>Existing Task Types</h2>
+  <p> TODO search filter here </p>
   <ul>
   {% for task_type in task_types %}
     <li>{{task_type.task_type}}
       <ul>
+        <li> TODO - make these a popup?</li>
         <li>Required: {% for field in task_type.required_fields %} {{field}}, {% endfor %} </li>
         <li>Optional: {% for field in task_type.optional_fields %} {{field}}, {% endfor %} </li> 
       </ul>
@@ -49,13 +51,19 @@
     <!-- templates for cloning -->
     <div style="display: none;">
 
-        <input id="field_template" class="username form-control" type="text" name="field" placeholder="Field">
+        <input id="text_field_template" class="username form-control" type="text" name="field" placeholder="Text Field">
+
         <span id="required_label">Required: </span>
-        <input type="checkbox" id="required_template" name="required_template" value="required" checked>
-        <span id="remove_template">Remove Field</span>
+        <input class="pointer" type="checkbox" id="required_template" name="required_template" value="required" checked>
+        <button id="remove_template" type="button" style="margin: 10px">Remove</button>
+
+        <!-- <div id="choice_field_template">
+
+        </div> -->
 
     </div>
-    <span onclick="addField()">Add Field</span>
+    <span onclick="addField()">Add Text Field</span>
+    <p> TODO Make it so they can add a Multiple Choice Field with provided options </p>
     <br>
 
 
@@ -68,7 +76,7 @@
   
   function addField() {
 
-    var box = jQuery("#field_template").clone();
+    var box = jQuery("#text_field_template").clone();
     box.css("display","block");
     box.attr("id", "field_"+count)
     box.attr("name", "field_"+count)
@@ -76,17 +84,18 @@
     jQuery("#task_typefields").append(box);
 
     var required_label = jQuery("#required_label").clone();
-    required_label.css("display","block");
+    required_label.css("display","inline");
+    required_label.attr("id", "required_label_"+count)
     jQuery("#task_typefields").append(required_label);
 
     var required = jQuery("#required_template").clone();
-    required.css("display","block");
+    required.css("display","inline");
     required.attr("id", "required_"+count)
     required.attr("name", "required_"+count)
     jQuery("#task_typefields").append(required);
 
     var remove = jQuery("#remove_template").clone();
-    remove.css("display","block");
+    remove.css("display","inline");
     remove.attr("id", "remove_"+count)
     remove.attr("onclick", "removeField("+count+")")
     jQuery("#task_typefields").append(remove);
@@ -97,7 +106,9 @@
 
   function removeField(id) {
     jQuery("#field_"+id).css("display", "none");
-    jQuery("#field_"+id).val(""); // clear out the value so that this field is not saved
+    jQuery("#field_"+id).val(""); // clear out the value so that this field is not saved to database upon submission
+    jQuery("#required_"+id).css("display", "none");
+    jQuery("#required_label_"+id).css("display", "none");
     jQuery("#remove_"+id).css("display", "none");
   }
 </script>

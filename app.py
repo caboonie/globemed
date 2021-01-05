@@ -82,6 +82,12 @@ def add_user():
 def add_task_type():
     print("form", request.form)
     task_type = request.form['task_type']
+    if task_type == "":
+        flash("Cannot make a task without a name.")
+        return redirect(url_for('dashboard'))
+    elif get_task_type_by_name(task_type) != None:
+        flash("Task by the name " + task_type + " already exists.")
+        return redirect(url_for('dashboard'))
     required_fields = []
     optional_fields = []
     for field in request.form:

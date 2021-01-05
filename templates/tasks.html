@@ -4,22 +4,18 @@
 
 	<h1>Task Overview</h1>
 
-	<p><button onclick="sortTable(0)">Sort</button></p>
-
 	<table id="task-table">
 		<tr>
-			<th> Id  </th>
-			<th> Type <button onclick="sortTable(1)">^</button> <button onclick="sortTable(1, true)">v</button></th>
-			<th>Description <button onclick="sortTable(2)">^</button> <button onclick="sortTable(2, true)">v</button></th>
+			<th> Type <button onclick="sortTable(0)">^</button> <button onclick="sortTable(0, true)">v</button></th>
+			<th>Description <button onclick="sortTable(1)">^</button> <button onclick="sortTable(1, true)">v</button></th>
 			{% for col in col_strings %}
-				<th> {{ col }} <button onclick="sortTable( {{loop.index+2}} )">^</button> <button onclick="sortTable({{loop.index+2}}, true)">v</button></th>
+				<th> {{ col }} <button onclick="sortTable( {{loop.index+1}} )">^</button> <button onclick="sortTable({{loop.index+1}}, true)">v</button></th>
 			{% endfor %}
 	        
 	    </tr>
 	{% for task in tasks %}
 		<tr class="task-row">
-			<td><a href="/task/{{task.id}}"> {{ task.id }} </a></td>
-			<td> {{ task.task_type }} </td>
+			<td><a href="/task/{{task.id}}"> {{ task.task_type }} </a></td>
 			{% if task.description|length > 20 %}
 		        <td class="desc-col"> {{ task.description[:20] }} <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></td>
 		    {% else %}
@@ -34,6 +30,9 @@
     </table>
 
 <script>
+
+
+
 function sortTable(index, reverse=false) {
   console.log("sorting index", index);
   var table, rows, switching, i, x, y, shouldSwitch;
@@ -55,6 +54,11 @@ function sortTable(index, reverse=false) {
       one from current row and one from the next:*/
       x = rows[i].getElementsByTagName("TD")[index];
       y = rows[i + 1].getElementsByTagName("TD")[index];
+      if (index==0) {
+        x = x.getElementsByTagName("A")[0];
+        y = y.getElementsByTagName("A")[0];
+      }
+      
       //check if the two rows should switch place:
       if (((x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) && !reverse) || ( reverse &&  (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) ) ) {
       	console.log("comparing", x.innerHTML.toLowerCase(), y.innerHTML.toLowerCase())

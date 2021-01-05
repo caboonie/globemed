@@ -24,8 +24,7 @@
 
   </script>
 
-<form action="{{ url_for('add_task') }}" method = 'post'>
-	<label for="task_type">Task type:</label>
+
   <h3>Choose a task type:</h3>
   <select id="task_type" name="task_type" onchange="updateFields()">
   	<option value=""></option>
@@ -37,13 +36,15 @@
   <!-- I want the value of this select to cause one of -->
 
   {% for task_type in task_types %}
-	  <div class="form-group" id="container_{{task_type.task_type}}" style="display: none">
+  <form action="{{ url_for('add_task') }}" id="container_{{task_type.task_type}}" style="display: none" method = 'post'>
+  	<input style="display: none" type="text"  name="task_type" value="{{task_type.task_type}}">
+	  <div class="form-group" >
 	  	
 	  	<div>Required Fields:</div>
-	  	<label for="due_date">Due date: </label><input type="date" id="due_date" name="due_date">
-	  	<label for="description">Description: </label><textarea id="description" name="description" rows="4" cols="50"> </textarea>
+	  	<label for="due_date">Due date: </label><input  type="date" id="due_date" name="due_date">
+	  	<label for="description">Description: </label><textarea  id="description" name="description" rows="4" cols="50"> </textarea>
 	  	{% for field in task_type.required_fields %}
-	  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
+	  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input  type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
 	  	{% endfor %}
 
 	  	<div>Optional Fields:</div>
@@ -53,6 +54,7 @@
 
 	  	 <button class="btn btn-success" type="submit" id="submit_new_user"> Add Task </button>
 	  </div>
+	 </form>
 
 
   {% endfor %}
@@ -60,7 +62,7 @@
 
 
   	
-  </form>
+  
 
   
 

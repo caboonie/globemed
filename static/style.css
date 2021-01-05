@@ -24,6 +24,14 @@ td {
 	border: 1px solid black;
 }
 
+input {
+  max-width: 500px;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
 .task-type {
 	color: blue;
 

@@ -4,19 +4,15 @@
 
 	<h1>Task Overview</h1>
 
-	{% if task.task_type == "appointment" %}
-
-	<h2> {{ task.task_type }} </h2>
-	<h3> {{ task.due_datestring }} </h3>
-	<p> Patient Name: {{ task.patient_name }} </p>
-	<p> {{ task.description }} </p>
-
-	{% else %}
 
 	<h2> {{ task.task_type }} </h2>
 	<h3> {{ task.due_datestring }} </h3>
 	<p> {{ task.description }} </p>
+	<p> Completed: {{task.completed}} </p>
+	{% for field in task.fields %}
+	<p> {{field}}: {{task.fields[field]}} </p>
+	
 
-	{% endif %}
+	{% endfor %}
 
 {%endblock%}

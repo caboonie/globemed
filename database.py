@@ -68,7 +68,7 @@ def create_task(user, due_date, description, task_type, fields=None):
         return False, "Contains extraneous fields: " + " ".join([field for field in fields if field not in task_type_meta.required_fields+task_type_meta.optional_fields])
 
     task = Task(creator_id=user.id, created_datetime=datetime.now(), created_datestring=datetime.now().strftime("%m/%d/%Y"), due_datetime=due_date, due_datestring=due_date.strftime("%m/%d/%Y"), 
-        description=description, task_type=task_type, fields=fields)
+        description=description, task_type=task_type, completed=False, fields=fields)
     
     session.add(task)
     session.commit()
@@ -97,6 +97,6 @@ def search_descr(search_text):
             filtered_tasks.append(task)
     return filtered_tasks
 
-create_task(session.query(User).filter_by(username='admin').first(), datetime.now(), "test", "appointment", {"patient_name":"caleb"})
+create_task(session.query(User).filter_by(username='admin').first(), datetime.now(), "test", "appointment", {"Patient name":"caleb"})
 # create_task(session.query(User).filter_by(username='admin').first(), datetime.now(), "test2", "prescription")
 # create_appointment(session.query(User).filter_by(username='admin').first(), datetime.now(), "tes;sdlkjf;ladskjfl;asdlkldjfklsdfj kdjklfsdj;lkfjksdl akdlfjkdsj dlakfjdskljf slkdfjlkdsjfdslkj sdflkjdslkjt", "caleb")
