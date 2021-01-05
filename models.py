@@ -28,6 +28,7 @@ class Task(Base):
     due_datetime = Column(DateTime)
     due_datestring = Column(String)
     description = Column(String)
+    completed = Column(Boolean) # completed or not
     fields = Column(PickleType) # dictionary of strings to strings
 
 class TaskType(Base):

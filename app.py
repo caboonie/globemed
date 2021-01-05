@@ -3,6 +3,7 @@ from flask import Flask, request, redirect, render_template, Response, send_file
 from flask import session as login_session
 import json
 from functools import wraps
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "a;lfkdsjaflksdj"
@@ -113,7 +114,18 @@ def add_task():
     if request.method == 'GET':
         return render_template("add_task.html", task_types=get_task_types())
     else:
-        pass
+        print(request.form)
+        task_type_name = request.form['task_type']
+        task_type = get_task_type_by_name(task_type_name)
+        due_date_str = request.form["due_date"]
+        due_date = datetime. strptime(due_date_str, '%Y-%m-%d')
+        description = request.form["description"]
+        fields = {}
+        for field in request.form:
+            if field not in ["task_type", "due_date", "description"]: # TODO - don't let the use make custom fields using these names
+                fields[field] = request.form[field]
+        succeeded, msg = create_task(get_user(login_session["username"]), due_date, description, task_type_name, fields)
+        return render_template("add_task.html", task_types=get_task_types())
 
 @app.route('/search',  methods = ['GET', 'POST'])
 @check_login_wrapper
