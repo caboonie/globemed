@@ -6,6 +6,13 @@ from passlib.apps import custom_app_context as pwd_security
 Base = declarative_base()
 TASK_TYPES = ['prescription', 'appointment']
 
+class Reminder():
+    def __init__(self, amount, unit):
+        self.amount = amount
+        self.unit = unit
+
+
+
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
@@ -30,6 +37,8 @@ class Task(Base):
     description = Column(String)
     completed = Column(Boolean) # completed or not
     fields = Column(PickleType) # dictionary of strings to strings
+    reminders = Column(PickleType) # list of datetimes
+    reminder_datestrings = Column(PickleType) # list of datetimes
 
 class TaskType(Base):
     __tablename__ = "task_types"
@@ -37,3 +46,4 @@ class TaskType(Base):
     task_type = Column(String)
     required_fields = Column(PickleType) # list of strings that are required keys in the fields entry of a task
     optional_fields = Column(PickleType) # list of strings that are allowed but not required keys in the fields entry of a task
+    reminders = Column(PickleType) # list of dates for when reminders should go off

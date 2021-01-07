@@ -32,6 +32,7 @@
         <li> TODO - make these a popup?</li>
         <li>Required: {% for field in task_type.required_fields %} {{field}}, {% endfor %} </li>
         <li>Optional: {% for field in task_type.optional_fields %} {{field}}, {% endfor %} </li> 
+        <li>Reminders: {% for reminder in task_type.reminders %}  {{reminder.amount}} {{reminder.unit}}(s), {% endfor %} </li>
       </ul>
     </li>
 
@@ -42,10 +43,15 @@
   <form action="{{ url_for('add_task_type') }}" method = 'post'>
     <h2>Create a New Task Type</h2>
     <div class="form-group">
-      <input id="task_type" class="username form-control" type="text" name="task_type" placeholder="Task Type">
+      <input id="task_type" class="username form-control" type="text" name="task_type" placeholder="Task Type" required>
     </div>
 
     <div id="task_typefields" class="form_group">
+        <button type="button" onclick="addField()" style="margin: 10px;">Add Text Field</button>
+        <button type="button" onclick="addOptionField()" style="margin: 10px;">Add Option Field</button>
+    </div>
+
+    <div id="task_reminders" class="form_group">
     </div>
 
     <!-- templates for cloning -->
@@ -53,17 +59,30 @@
 
         <input id="text_field_template" class="username form-control" type="text" name="field" placeholder="Text Field">
 
+
         <span id="required_label">Required: </span>
         <input class="pointer" type="checkbox" id="required_template" name="required_template" value="required" checked>
         <button id="remove_template" type="button" style="margin: 10px">Remove</button>
+        <!-- Todo make this remove a little X on the side -->
 
-        <!-- <div id="choice_field_template">
+        <div id="choice_field_template">        </div>
 
-        </div> -->
+        <input id="option_template" class="username form-control" type="text" name="option" placeholder="Option">
+        <button type="button" id="add_template"  style="margin: 10px;">Add Option</button>
+        <span id="other_label">Allow Other: </span>
+        <input class="pointer" type="checkbox" id="other_template" name="other_template" value="other" checked>
+
+        <div id="reminder_box"></div>
+        <input id="reminder_number_template" class="username form-control" type="number" name="reminder_number">
+        <select id="reminder_unit_template" name="reminder_unit">
+            {% for unit in units %}
+                <option value="{{unit}}">{{unit}}</option>
+            {% endfor %}
+          </select>
 
     </div>
-    <span onclick="addField()">Add Text Field</span>
-    <p> TODO Make it so they can add a Multiple Choice Field with provided options </p>
+    
+    <button type="button" onclick="addReminder()" style="margin: 10px;">Add Reminder</button>
     <br>
 
 
@@ -104,11 +123,152 @@
     count += 1;
   }
 
+  function addReminder() {
+
+    var box = jQuery("#reminder_box").clone();
+    box.css("display","block");
+    box.attr("id", "field_"+count)
+
+    var label = $("<p></p>").text("Enter a reminder for (number) (unit) before the due date");
+    box.append(label)
+    var number = jQuery("#reminder_number_template").clone();
+    number.css("display","block");
+    number.attr("name", "reminder_number_"+count)
+    box.append(number);
+
+    var unit = jQuery("#reminder_unit_template").clone();
+    unit.css("display","block");
+    unit.attr("id", "reminder_unit_"+count)
+    unit.attr("name", "unit_"+count)
+    box.append(unit);
+
+    var remove = jQuery("#remove_template").clone();
+    remove.css("display","inline");
+    remove.attr("id", "remove_"+count)
+    remove.attr("onclick", "removeField("+count+")")
+    box.append(remove)
+
+    jQuery("#task_reminders").append(box);
+    
+
+    count += 1;
+  }
+
+  // TODO - clean this up
+  function addOptionField() {
+    var box = jQuery("#choice_field_template").clone();
+    box.css("display","block");
+    box.attr("id", "field_"+count)
+    box.attr("name", "option_field_"+count)
+    box.attr("placeholder", "Field "+count)
+    box.data("count", 2)
+    jQuery("#task_typefields").append(box);
+
+    var add_option = jQuery("#add_template").clone();
+    add_option.css("display","inline");
+    add_option.attr("id", "add_"+count)
+    add_option.attr("onclick", "addOption("+count+")")
+    jQuery("#task_typefields").append(add_option);
+
+    var other_label = jQuery("#other_label").clone();
+    other_label.css("display","inline");
+    other_label.attr("id", "other_label_"+count)
+    jQuery("#task_typefields").append(other_label);
+
+    var other = jQuery("#other_template").clone();
+    other.css("display","inline");
+    other.attr("id", "other_"+count)
+    other.attr("name", "other_"+count)
+    jQuery("#task_typefields").append(other);
+
+    var required_label = jQuery("#required_label").clone();
+    required_label.css("display","inline");
+    required_label.attr("id", "required_label_"+count)
+    jQuery("#task_typefields").append(required_label);
+
+    var required = jQuery("#required_template").clone();
+    required.css("display","inline");
+    required.attr("id", "required_"+count)
+    required.attr("name", "required_"+count)
+    jQuery("#task_typefields").append(required);
+
+    var remove = jQuery("#remove_template").clone();
+    remove.css("display","inline");
+    remove.attr("id", "remove_"+count)
+    remove.attr("onclick", "removeField("+count+")")
+    jQuery("#task_typefields").append(remove);
+
+
+    var option_prompt = jQuery("#text_field_template").clone();
+    option_prompt.attr("name", "option_field_"+count)
+    option_prompt.attr("id", "option_field_"+count)
+    option_prompt.attr("placeholder", "Field "+count)
+    box.append(option_prompt);
+
+    var option = jQuery("#option_template").clone();
+    option.attr("name", "option_"+count+"_1")
+    option.attr("id", "option_"+count+"_1")
+    option.attr("placeholder", "Option 1")
+    box.append(option);
+
+    var remove_option = jQuery("#remove_template").clone();
+    remove_option.css("display","inline");
+    remove_option.attr("id", "remove_"+count+"_1")
+    remove_option.attr("onclick", "removeOption("+count+", 1)")
+    box.append(remove_option);    
+
+    count += 1;
+  }
+
+  function addOption(id) {
+
+    box = jQuery("#field_"+id);
+    console.log("called add option", id, box.data.count)
+
+    var option = jQuery("#option_template").clone();
+    option.attr("name", "option_"+id+"_"+box.data("count"))
+    option.attr("id", "option_"+id+"_"+box.data("count"))
+    option.attr("placeholder", "Option "+box.data("count"))
+    box.append(option);
+
+    var remove_option = jQuery("#remove_template").clone();
+    remove_option.css("display","inline");
+    remove_option.attr("id", "remove_"+id+"_"+box.data("count"))
+    remove_option.attr("onclick", "removeOption("+id+", "+box.data("count")+")")
+    box.append(remove_option);
+
+    box.data("count", box.data("count")+1);
+    console.log("finished add option", id, box.data.count)
+
+  }
+
+  function removeOption(field_id, option_id){
+
+    console.log("called removeOption with", field_id, option_id)
+    jQuery("#field_"+field_id+"_option_"+option_id).css("display", "none");
+    jQuery("#field_"+field_id+"_option_"+option_id).val(""); // clear out the value so that this field is not saved to database upon submission
+    jQuery("#remove_"+field_id+"_"+option_id).css("display", "none");
+
+  }
+
   function removeField(id) {
     jQuery("#field_"+id).css("display", "none");
     jQuery("#field_"+id).val(""); // clear out the value so that this field is not saved to database upon submission
     jQuery("#required_"+id).css("display", "none");
     jQuery("#required_label_"+id).css("display", "none");
+    try {
+      jQuery("#other_"+id).css("display", "none");
+      jQuery("#other_label_"+id).css("display", "none");
+      jQuery("#add_"+id).css("display", "none");
+    } catch {
+
+    }
+
+    try {
+      jQuery("#reminder_unit_"+id).css("display", "none");
+    } catch {
+
+    }
     jQuery("#remove_"+id).css("display", "none");
   }
 </script>

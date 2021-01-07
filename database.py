@@ -35,8 +35,8 @@ if not user:
 
 # Task Type Interactions
 
-def create_task_type(task_type, required_fields, optional_fields):
-    task_type = TaskType(task_type=task_type, required_fields=required_fields, optional_fields=optional_fields)
+def create_task_type(task_type, required_fields, optional_fields, reminders):
+    task_type = TaskType(task_type=task_type, required_fields=required_fields, optional_fields=optional_fields, reminders=reminders)
     session.add(task_type)
     session.commit()
 
@@ -52,23 +52,26 @@ def get_task_type_by_name(name):
 
 task_type = get_task_type_by_name("appointment")
 if not task_type:
-    create_task_type("appointment", ["patient_name"], [])
+    create_task_type("appointment", ["patient_name"], [], [])
 
 # Task Interactions
 
-def create_task(user, due_date, description, task_type, fields=None):
-    if fields == None:
-        fields = {}
+def clean_fields(task_type_meta):
+    return ([field if type(field) == str else list(field)[0] for field in task_type_meta.required_fields],
+            [field if type(field) == str else list(field)[0] for field in task_type_meta.optional_fields])
+
+def create_task(user, due_date, description, task_type, fields, reminders, reminder_datestrings):
     task_type_meta = get_task_type_by_name(task_type)
+    required_fields, optional_fields = clean_fields(task_type_meta)
     if not task_type_meta:
         return False, "Not a valid task type"
-    elif not all([field in fields for field in task_type_meta.required_fields]):
-        return False, "Missing required_fields: " + " ".join([field for field in task_type_meta.required_fields if field not in fields])
-    elif not all([field in task_type_meta.required_fields+task_type_meta.optional_fields for field in fields]):
-        return False, "Contains extraneous fields: " + " ".join([field for field in fields if field not in task_type_meta.required_fields+task_type_meta.optional_fields])
+    elif not all([field in fields for field in required_fields]):
+        return False, "Missing required_fields: " + " ".join([field for field in required_fields if field not in fields])
+    elif not all([field in required_fields+optional_fields for field in fields]):
+        return False, "Contains extraneous fields: " + " ".join([field for field in fields if field not in required_fields+optional_fields])
 
-    task = Task(creator_id=user.id, created_datetime=datetime.now(), created_datestring=datetime.now().strftime("%m/%d/%Y"), due_datetime=due_date, due_datestring=due_date.strftime("%m/%d/%Y"), 
-        description=description, task_type=task_type, completed=False, fields=fields)
+    task = Task(creator_id=user.id, created_datetime=datetime.now(), created_datestring=datetime.now().strftime("%Y-%m-%d"), due_datetime=due_date, due_datestring=due_date.strftime("%Y-%m-%d"), 
+        description=description, task_type=task_type, completed=False, fields=fields, reminders=reminders, reminder_datestrings=reminder_datestrings)
     
     session.add(task)
     session.commit()
@@ -90,6 +93,14 @@ def get_tasks():
 def get_task(task_id):
     return session.query(Task).filter_by(id=task_id).first()
 
+def get_tasks_day(date):
+    tasks = []
+    for task in get_tasks():
+        print("task due", task.due_datestring, task.reminder_datestrings, date)
+        if task.due_datestring == date or date in task.reminder_datestrings:
+            tasks.append(task)
+    return tasks
+
 def search_descr(search_text):
     filtered_tasks = []
     for task in get_tasks():
@@ -97,6 +108,6 @@ def search_descr(search_text):
             filtered_tasks.append(task)
     return filtered_tasks
 
-create_task(session.query(User).filter_by(username='admin').first(), datetime.now(), "test", "appointment", {"Patient name":"caleb"})
+create_task(session.query(User).filter_by(username='admin').first(), datetime.now(), "test", "appointment", {"Patient name":"caleb"}, [], [])
 # create_task(session.query(User).filter_by(username='admin').first(), datetime.now(), "test2", "prescription")
 # create_appointment(session.query(User).filter_by(username='admin').first(), datetime.now(), "tes;sdlkjf;ladskjfl;asdlkldjfklsdfj kdjklfsdj;lkfjksdl akdlfjkdsj dlakfjdskljf slkdfjlkdsjfdslkj sdflkjdslkjt", "caleb")

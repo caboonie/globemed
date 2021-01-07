@@ -10,9 +10,20 @@
 	<p> {{ task.description }} </p>
 	<p> Completed: {{task.completed}} </p>
 	{% for field in task.fields %}
-	<p> {{field}}: {{task.fields[field]}} </p>
+		<p> {{field}}: {{task.fields[field]}} </p>
 	
 
 	{% endfor %}
+
+	<h3>Reminders</h3>
+	{% for reminder in task.reminder_datestrings %}
+		<p> {{reminder}} </p>
+
+	{% endfor %}
+
+
+	<h3>Update Task</h3>
+
+
 
 {%endblock%}

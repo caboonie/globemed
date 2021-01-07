@@ -8,6 +8,8 @@ from datetime import datetime
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "a;lfkdsjaflksdj"
 
+UNITS = ["day", "week", "month"]
+
 def check_login_wrapper(func):
     @wraps(func)
     def inner(*args, **kwargs):
@@ -57,7 +59,7 @@ def logout():
 @app.route('/dashboard')
 @check_login_wrapper
 def dashboard():
-    return render_template("dashboard.html", task_types = get_task_types())
+    return render_template("dashboard.html", task_types = get_task_types(), units= UNITS)
 
 @app.route("/add_user", methods = ['POST'])
 @check_login_wrapper
@@ -90,16 +92,36 @@ def add_task_type():
         return redirect(url_for('dashboard'))
     required_fields = []
     optional_fields = []
+    reminders = []
     for field in request.form:
-        if field in ["task_type"] or "required" in field or request.form[field] == "":
-            continue
-        else:
+
+        if field[:6] == "field_" and request.form[field] != "":
             count = field.split("_")[1]
             if "required_"+count in request.form:
                 required_fields.append(request.form[field])
             else:
                 optional_fields.append(request.form[field])
-    create_task_type(task_type, required_fields, optional_fields)
+        elif field[:13] == "option_field_" and request.form[field] != "":
+            count = field.split("_")[2]
+            i = 1
+            options = []
+            print("option_{}_{}".format(count, i) in request.form, "option_{}_{}".format(count, i) )
+            while "option_{}_{}".format(count, i) in request.form:
+                if request.form["option_{}_{}".format(count, i)] != "":
+                    options.append(request.form["option_{}_{}".format(count, i)])
+                i += 1
+            if "other"+count in request.form:
+                options.append("Other")
+            print("options here", options)
+            if "required_"+count in request.form:
+                required_fields.append({request.form[field]:options})
+            else:
+                optional_fields.append({request.form[field]:options})
+        elif field[:16] == "reminder_number_" and request.form[field] != "":
+            count = field.split("_")[2]
+            reminders.append(Reminder(int(request.form[field]), request.form["unit_{}".format(count)]))
+            
+    create_task_type(task_type, required_fields, optional_fields, reminders)
     flash("Task Type: " + task_type + " created!")
 
     return redirect(url_for('dashboard'))
@@ -107,7 +129,13 @@ def add_task_type():
 @app.route('/tasks')
 @check_login_wrapper
 def tasks():
-    return render_template("tasks.html", tasks=get_tasks(), col_strings = ["Due Date"], col_vars = ["due_datestring"])
+    return render_template("tasks.html", tasks=get_tasks(), col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types())
+
+@app.route('/daily_tasks/<date>')
+@check_login_wrapper
+def daily_tasks(date):
+    print("date", date)
+    return render_template("daily_tasks.html", tasks=get_tasks_day(date), col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), datestring=date)
 
 @app.route('/task/<int:task_id>')
 @check_login_wrapper
@@ -118,19 +146,27 @@ def task(task_id):
 @check_login_wrapper
 def add_task():
     if request.method == 'GET':
-        return render_template("add_task.html", task_types=get_task_types())
+        return render_template("add_task.html", task_types=get_task_types(), units=UNITS)
     else:
         print(request.form)
         task_type_name = request.form['task_type']
         task_type = get_task_type_by_name(task_type_name)
         due_date_str = request.form["due_date"]
-        due_date = datetime. strptime(due_date_str, '%Y-%m-%d')
+        due_date = datetime.strptime(due_date_str, '%Y-%m-%d')
         description = request.form["description"]
         fields = {}
+        reminders = []
+        reminder_datestrings = []
         for field in request.form:
-            if field not in ["task_type", "due_date", "description"]: # TODO - don't let the use make custom fields using these names
+            if field[:8] == "reminder":
+                reminder_date_str = request.form[field]
+                reminder_date = datetime.strptime(reminder_date_str, '%Y-%m-%d')
+                reminders.append(reminder_date)
+                reminder_datestrings.append(reminder_date_str)
+            elif field not in ["task_type", "due_date", "description"]: # TODO - don't let the use make custom fields using these names
                 fields[field] = request.form[field]
-        succeeded, msg = create_task(get_user(login_session["username"]), due_date, description, task_type_name, fields)
+        succeeded, msg = create_task(get_user(login_session["username"]), due_date, description, task_type_name, fields, reminders, reminder_datestrings)
+        flash("Task added successfully!")
         return render_template("add_task.html", task_types=get_task_types())
 
 @app.route('/search',  methods = ['GET', 'POST'])

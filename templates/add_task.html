@@ -8,18 +8,58 @@
 
  <script type="text/javascript">
   	previous_container = null;
+  	previous_type = null;
 
   	
   	function updateFields() {
   		console.log("called update")
   		var type_input = jQuery("#task_type")
-  		var container = jQuery("#container_" + type_input.val())
+  		task_type = type_input.val()
+  		var container = jQuery("#container_" + task_type)
   		
   		if (!(previous_container == null)){
   			previous_container.css("display", "none")
+  			jQuery(".required_"+previous_type).each(function(){
+  				$(this).attr("required", "false")
+  			})
   		}
   		container.css("display", "block")
+  		jQuery(".required_"+task_type).each(function(){
+			$(this).attr("required", "true")
+		})
   		previous_container = container
+  		previous_type = task_type
+  	}
+
+  	// function initDate(amount, unit) {
+  	// 	this.innerHTML = this.data("amount") + " " + this.data("unit") + "(s) before due date."
+  	// }
+
+  	function calculateAllDates(index) {
+  		var due_date = new Date(jQuery("#due_date_"+index).val());
+  		var due_date = new Date(due_date.getTime() + due_date.getTimezoneOffset()*60*1000) // correct for timezone offset
+  		// console.log("due_date", due_date, due_date.getTime(),  due_date.getTimezoneOffset()*60*1000, new_due_date)
+  		jQuery(".reminder").each(function(){
+  			reminder = $(this); // convert to jQuery
+  			console.log("reminder", reminder, reminder.data("user-changed"), !reminder.data("user-changed"))
+  			if (!reminder.data("user-changed")) {
+  				console.log(reminder.data("unit"))
+	  			if (reminder.data("unit") == "day"){
+	  				remind_date = due_date - parseInt(reminder.data("amount"))*24*60*60*1000
+	  			}
+	  			var remind_date = new Date(remind_date);
+	  			var day = ("0" + remind_date.getDate()).slice(-2);
+				var month = ("0" + (remind_date.getMonth() + 1)).slice(-2);
+
+				var display_date = remind_date.getFullYear()+"-"+(month)+"-"+(day) ;
+	  			console.log(remind_date, "display date", display_date)
+	  			reminder.val(display_date);
+	  		}
+  		})
+  	}
+
+  	function userChange(reminder) {
+  		$(reminder).data("user-changed", "true");
   	}
 
   </script>
@@ -34,33 +74,122 @@
   </select>
 
   <!-- I want the value of this select to cause one of -->
+  <!-- templates for cloning -->
+    <div style="display: none;">
+    	<button id="remove_template" type="button" style="margin: 10px">Remove</button>
+    	<div id="reminder_box"></div>
+        <input id="reminder_date_template" class="username form-control" type="date" name="reminder_number">
+    </div>
 
   {% for task_type in task_types %}
+  {% set outer_loop = loop %}
   <form action="{{ url_for('add_task') }}" id="container_{{task_type.task_type}}" style="display: none" method = 'post'>
   	<input style="display: none" type="text"  name="task_type" value="{{task_type.task_type}}">
 	  <div class="form-group" >
 	  	
 	  	<div>Required Fields:</div>
-	  	<label for="due_date">Due date: </label><input  type="date" id="due_date" name="due_date">
-	  	<label for="description">Description: </label><textarea  id="description" name="description" rows="4" cols="50"> </textarea>
+	  	<label for="due_date">Due date: </label><input class="required_{{task_type.task_type}}"  type="date" id="due_date_{{loop.index}}" name="due_date" onchange="calculateAllDates({{loop.index}})">
+	  	<!-- TODO - for some reason, description isn't required??? -->
+	  	<label for="description">Description: </label><textarea class="required_{{task_type.task_type}}" name="description" rows="4" cols="50"> </textarea>
 	  	{% for field in task_type.required_fields %}
-	  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input  type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
+	  		{% if field is mapping %}
+	  			{% for key in field %}
+	  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:</label>
+	  				<select class="required_{{task_type.task_type}}" id="{{task_type.task_type}}_{{key}}" name="{{key}}" >
+					  	<option value=""></option>
+					  	{% for option in field[key] %}
+						    <option value="{{option}}">{{option}}</option>
+					    {% endfor %}
+					  </select>
+	  			{% endfor %}
+	  		{% else %}
+		  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input class="required_{{task_type.task_type}}" type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
+		  	{% endif %}
 	  	{% endfor %}
 
-	  	<div>Optional Fields:</div>
-	  	{% for field in task_type.optional_fields %}
-	  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
-	  	{% endfor %}
+	  	{% if (task_type.optional_fields | length) > 0%}
+		  	<div>Optional Fields:</div>
+		  	{% for field in task_type.optional_fields %}
+			  	{% if field is mapping %}
+		  			{% for key in field %}
+		  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:</label>
+		  				<select id="{{task_type.task_type}}_{{key}}" name="{{key}}" >
+						  	<option value=""></option>
+						  	{% for option in field[key] %}
+							    <option value="{{option}}">{{option}}</option>
+						    {% endfor %}
+						  </select>
+		  			{% endfor %}
+		  		{% else %}
+		  			<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
+		  		{% endif %}
+		  	{% endfor %}
+		{% endif %}
+
+		<div id="task_reminders_{{task_type.task_type}}" class="form_group">
+		  	<div>Current Reminders:</div>
+		  	{% for reminder in task_type.reminders %}
+		  		<div id="field_{{loop.index}}">
+			  		<p>Automatically {{reminder.amount}} {{reminder.unit}}(s) before (but user can adjust): </p>
+			  		<input name="reminder_{{loop.index}}" type="date" id="reminder_{{outer_loop.index}}_{{loop.index}}" class="reminder" data-amount="{{reminder.amount}}" data-unit="{{reminder.unit}}" data-user-changed="false" onchange="userChange(this)">
+			  		<button id="remove_template" type="button" style="margin: 10px" onclick="removeField({{loop.index}})">Remove</button>
+			  	</div>
+		  	{% endfor %}
+
+	  	
+	    </div>
+
+	  	<button type="button" onclick="addReminder('{{task_type.task_type}}')" style="margin: 10px;">Add Reminder</button>
 
 	  	 <button class="btn btn-success" type="submit" id="submit_new_user"> Add Task </button>
 	  </div>
 	 </form>
+	 
 
 
   {% endfor %}
 
 
+<script type="text/javascript">
+count = -1
+	
+function addReminder(task_type) {
+    var box = jQuery("#reminder_box").clone();
+    box.css("display","block");
+    box.attr("id", "field_"+count)
 
+    var label = $("<p></p>").text("Enter a reminder date: ");
+    box.append(label)
+    var number = jQuery("#reminder_date_template").clone();
+    number.css("display","block");
+    number.attr("name", "reminder_date_"+count)
+    box.append(number);
+
+    var remove = jQuery("#remove_template").clone();
+    remove.css("display","inline");
+    remove.attr("id", "remove_"+count)
+    remove.attr("onclick", "removeField("+count+")")
+    box.append(remove)
+
+    jQuery("#task_reminders_"+task_type).append(box);
+    
+
+    count -= 1;
+  }
+
+function removeField(id) {
+    jQuery("#field_"+id).css("display", "none");
+    jQuery("#field_"+id).val(""); // clear out the value so that this field is not saved to database upon submission
+
+    try {
+      jQuery("#reminder_unit_"+id).css("display", "none");
+    } catch {
+
+    }
+    jQuery("#remove_"+id).css("display", "none");
+  }
+
+</script>
   	
   
 

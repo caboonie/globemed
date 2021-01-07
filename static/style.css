@@ -28,6 +28,10 @@ input {
   max-width: 500px;
 }
 
+button {
+  margin: 10px;
+}
+
 .pointer {
   cursor: pointer;
 }
@@ -44,7 +48,7 @@ input {
 }
 
 .navbar {
-	padding-left: 10px;
+	padding-left: 0px;
 	padding-right: 20px;
 }
 

@@ -32,8 +32,10 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="/">
-          <img alt="Brand Logo" src="{{url_for('static', filename='brand_logo.png')}}" style="max-height: 100%;">
+
+
+        <a class="navbar-brand" href="/" style="height: 70px; padding: 2px;">
+          <img alt="Brand Logo" src="{{url_for('static', filename='brand_logo.png')}}" style="max-height: 100%; border: 1px solid black; border-radius: 5px;">
         </a>
         <ul class="nav navbar-nav">
           <li><a href = "{{url_for('tasks')}}">Tasks</a></li>

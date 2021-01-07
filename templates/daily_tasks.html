@@ -1,8 +1,11 @@
 {% extends "layout.html" %}
 
 {% block body %}
-
-	<h1>Task Overview</h1>
+ <!-- TODO make these button pretty arrows -->
+  
+	<h1 id="day_header" style="display: inline">Tasks for {{datestring}}</h1>
+  <a id="prev_button"><- </a>
+  <a id="next_button"> -></a>
 
   <h3>Choose a task type:</h3>
   <select id="task_type" name="task_type" onchange="filterByTaskType()">
@@ -13,7 +16,7 @@
   </select>
 
   <div id="table-container">
-	  <table id="hidden-task-table" style="display: none;">
+	  <table id="hidden-task-table" style="display: none; width:100%;">
   		<tr>
   			<th> Type <button onclick="sortTable(0)">^</button> <button onclick="sortTable(0, true)">v</button></th>
   			<th>Description <button onclick="sortTable(1)">^</button> <button onclick="sortTable(1, true)">v</button></th>
@@ -39,16 +42,45 @@
     </table>
   </div>
 
+ 
+  
+
 
 <script>
+  var display_date = new Date(Date.parse("{{datestring}}"));
+  display_date =  new Date(display_date.getTime() + display_date.getTimezoneOffset()*60*1000)
+  jQuery("#day_header").innerHTML = "Tasks for "+display_date;
 
+  var next_date = new Date(display_date.valueOf());
+  next_date.setDate(next_date.getDate() + 1);
+  console.log("display_date",display_date, "next_date", next_date)
+
+  var day = ("0" + next_date.getDate()).slice(-2);
+  var month = ("0" + (next_date.getMonth() + 1)).slice(-2);
+
+  jQuery("#next_button").attr("href", "/daily_tasks/"+next_date.getFullYear()+"-"+month+"-"+day)
+
+  var prev_date = new Date(display_date.valueOf());
+  prev_date.setDate(prev_date.getDate() - 1);
+  var day = ("0" + prev_date.getDate()).slice(-2);
+  var month = ("0" + (prev_date.getMonth() + 1)).slice(-2);
+
+  jQuery("#prev_button").attr("href", "/daily_tasks/"+prev_date.getFullYear()+"-"+month+"-"+day)
+
+  // year, month, day = 
+
+  // corrected_date = new Date(Date.now().getTime() + due_date.getTimezoneOffset()*60*1000);
+  // var day = ("0" + remind_date.getDate()).slice(-2);
+  // var month = ("0" + (remind_date.getMonth() + 1)).slice(-2);
+  // var display_date = remind_date.getFullYear()+"-"+(month)+"-"+(day) ;
+  // jQuery("#day_header").innerHTML = "Tasks for "+display_date;
 
     
   function filterByTaskType() {
     console.log("filtering")
     var type_input = jQuery("#task_type").val().trim()
     console.log("by ",type_input)
-    var table = $("<table id=task-table-copy></table>").text("");
+    var table = $("<table id='task-table-copy' style='width:100%'></table>").text("");
 
     prev_table = jQuery("#hidden-task-table").clone();
     rows = prev_table.find('> tbody > tr');
