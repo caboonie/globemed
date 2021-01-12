@@ -2,9 +2,9 @@
 
 {% block body %}
  <!-- TODO make these button pretty arrows -->
-  <a href="/daily_tasks/{{datestring}}">Day</a>
-  <a href="/weekly_tasks/{{datestring}}">Week</a>
-  <a href="/monthly_tasks/{{datestring}}">Month</a>
+  <a href="/daily_tasks/{{datestrings[0]}}">Day</a>
+  <a href="/weekly_tasks/{{datestring[0]}}">Week</a>
+  <a href="/monthly_tasks/{{datestring[0]}}">Month</a>
   <br>
 	<h1 id="day_header" style="display: inline">Tasks for Monday, {{datestrings[0]}} - Sunday {{datestrings[6]}}</h1>
   <br>
