@@ -3,7 +3,7 @@ from flask import Flask, request, redirect, render_template, Response, send_file
 from flask import session as login_session
 import json
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "a;lfkdsjaflksdj"
@@ -121,7 +121,7 @@ def add_task_type():
             count = field.split("_")[2]
             reminders.append(Reminder(int(request.form[field]), request.form["unit_{}".format(count)]))
             
-    create_task_type(task_type, required_fields, optional_fields, reminders)
+    create_task_type(task_type, required_fields, optional_fields, reminders, request.form["task_color"])
     flash("Task Type: " + task_type + " created!")
 
     return redirect(url_for('dashboard'))
@@ -131,11 +131,50 @@ def add_task_type():
 def tasks():
     return render_template("tasks.html", tasks=get_tasks(), col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types())
 
+@app.route('/daily_tasks')
+@check_login_wrapper
+def daily_tasks_():
+    date = datetime.now().strftime("%Y-%m-%d")
+    return render_template("daily_tasks.html", tasks=get_tasks_day(date), col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), datestring=date)
+
 @app.route('/daily_tasks/<date>')
 @check_login_wrapper
 def daily_tasks(date):
     print("date", date)
     return render_template("daily_tasks.html", tasks=get_tasks_day(date), col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), datestring=date)
+
+
+@app.route('/weekly_tasks/<date>')
+@check_login_wrapper
+def weekly_tasks(date):
+
+    print("date", date)
+    date_datetime = datetime.strptime(date, "%Y-%m-%d")
+    monday =  date_datetime - timedelta(days = date_datetime.weekday())
+    monday_datestr = monday.strftime("%Y-%m-%d")
+    return render_template("weekly_tasks.html", tasks_by_day=get_tasks_week(monday_datestr), col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), 
+        datestrings = [(monday+timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)],
+        weekdays=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
+
+
+@app.route('/monthly_tasks/<date>')
+@check_login_wrapper
+def monthly_tasks(date):
+    
+    print("month date", date)
+    # date_datetime = datetime.strptime(date, "%Y-%m-%d")
+    # monday =  date_datetime - timedelta(days = date_datetime.weekday())
+    # monday_datestr = monday.strftime("%Y-%m-%d")
+    tasks_by_day, headers_by_day = get_tasks_month(date)
+    legend = {}
+    for day_notifications in tasks_by_day:
+        for notification in day_notifications:
+            legend[notification.task.task_type] = notification.task.color
+
+    return render_template("monthly_tasks.html", tasks_by_day=tasks_by_day, col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), 
+        month =  datetime.strptime(date, "%Y-%m-%d").strftime("%B, %Y"), datestring=date, headers_by_day=headers_by_day,
+        weekdays=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], legend=legend)
+
 
 @app.route('/task/<int:task_id>')
 @check_login_wrapper

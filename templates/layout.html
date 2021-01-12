@@ -38,7 +38,7 @@
           <img alt="Brand Logo" src="{{url_for('static', filename='brand_logo.png')}}" style="max-height: 100%; border: 1px solid black; border-radius: 5px;">
         </a>
         <ul class="nav navbar-nav">
-          <li><a href = "{{url_for('tasks')}}">Tasks</a></li>
+          <li><a href = "{{url_for('daily_tasks_')}}">Tasks</a></li>
           <li><a href = "{{url_for('add_task')}}">Add Task</a></li>
           <li>
             <form action="{{ url_for('search') }}" method = 'post'>

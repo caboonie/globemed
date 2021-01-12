@@ -32,6 +32,17 @@ button {
   margin: 10px;
 }
 
+
+
+.legend td {
+  min-width: 150px;
+}
+
+.calendar-box {
+  width: 100px;
+  height: 100px;
+}
+
 .pointer {
   cursor: pointer;
 }

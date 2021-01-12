@@ -11,6 +11,16 @@ class Reminder():
         self.amount = amount
         self.unit = unit
 
+class Notification():
+    def __init__(self, task, is_reminder):
+        self.task = task
+        self.is_reminder = is_reminder
+
+class HeaderNumber():
+    def __init__(self, number, is_month, datestring):
+        self.number = number
+        self.is_month = is_month
+        self.datestring = datestring
 
 
 class User(Base):
@@ -39,6 +49,7 @@ class Task(Base):
     fields = Column(PickleType) # dictionary of strings to strings
     reminders = Column(PickleType) # list of datetimes
     reminder_datestrings = Column(PickleType) # list of datetimes
+    color = Column(String)
 
 class TaskType(Base):
     __tablename__ = "task_types"
@@ -47,3 +58,4 @@ class TaskType(Base):
     required_fields = Column(PickleType) # list of strings that are required keys in the fields entry of a task
     optional_fields = Column(PickleType) # list of strings that are allowed but not required keys in the fields entry of a task
     reminders = Column(PickleType) # list of dates for when reminders should go off
+    color = Column(String)

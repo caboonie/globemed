@@ -6,7 +6,7 @@
   <a href="/weekly_tasks/{{datestring}}">Week</a>
   <a href="/monthly_tasks/{{datestring}}">Month</a>
   <br>
-	<h1 id="day_header" style="display: inline">Tasks for {{datestring}}</h1>
+	<h1 id="day_header" style="display: inline">Tasks for Monday, {{datestrings[0]}} - Sunday {{datestrings[6]}}</h1>
   <br>
   <a id="prev_button"><- </a>
   <a id="next_button"> -></a>
@@ -20,32 +20,35 @@
     {% endfor %}
   </select>
 
-  <div id="table-container">
-	  <table id="hidden-task-table" style="display: none; width:100%;">
-  		<tr>
-  			<th> Type <button onclick="sortTable(0)">^</button> <button onclick="sortTable(0, true)">v</button></th>
-  			<th>Description <button onclick="sortTable(1)">^</button> <button onclick="sortTable(1, true)">v</button></th>
-  			{% for col in col_strings %}
-  				<th> {{ col }} <button onclick="sortTable( {{loop.index+1}} )">^</button> <button onclick="sortTable({{loop.index+1}}, true)">v</button></th>
-  			{% endfor %}
-  	        
-  	    </tr>
-  	{% for task in tasks %}
-  		<tr class="task-row">
-  			<td><a href="/task/{{task.id}}"> {{ task.task_type }} </a></td>
-  			{% if task.description|length > 20 %}
-  		        <td class="desc-col"> {{ task.description[:20] }} <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></td>
-  		    {% else %}
-  		    	<td class="desc-col"> {{ task.description }} </td>
-  		    {% endif %}
-  	        <!-- <td> {{ task.due_datestring }} </td> -->
-  	        {% for col in col_vars %}
-  				<td> {{ task[col] }} </td>
-  			{% endfor %}
-  	    </tr>
-      {% endfor %}
-    </table>
-  </div>
+  {% for tasks in tasks_by_day %}
+    <h3><a href="/daily_tasks/{{datestrings[loop.index]}}">{{weekdays[loop.index]}}, {{datestrings[loop.index]}}</a></h3>
+    <div id="table-container-{{weekdays[loop.index]}}">
+  	  <table id="hidden-task-table-{{weekdays[loop.index]}}" style="display: none; width:100%;">
+    		<!-- <tr>
+    			<th> Type <button onclick="sortTable(0)">^</button> <button onclick="sortTable(0, true)">v</button></th>
+    			<th>Description <button onclick="sortTable(1)">^</button> <button onclick="sortTable(1, true)">v</button></th>
+    			{% for col in col_strings %}
+    				<th> {{ col }} <button onclick="sortTable( {{loop.index+1}} )">^</button> <button onclick="sortTable({{loop.index+1}}, true)">v</button></th>
+    			{% endfor %}
+    	        
+    	    </tr> -->
+    	{% for task in tasks %}
+    		<tr class="task-row">
+    			<td><a href="/task/{{task.id}}"> {{ task.task_type }} </a></td>
+    			{% if task.description|length > 20 %}
+    		        <td class="desc-col"> {{ task.description[:20] }} <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></td>
+    		    {% else %}
+    		    	<td class="desc-col"> {{ task.description }} </td>
+    		    {% endif %}
+    	        <!-- <td> {{ task.due_datestring }} </td> -->
+    	        {% for col in col_vars %}
+    				<td> {{ task[col] }} </td>
+    			{% endfor %}
+    	    </tr>
+        {% endfor %}
+      </table>
+    </div>
+  {% endfor %}
 
  
   
@@ -57,20 +60,20 @@
   jQuery("#day_header").innerHTML = "Tasks for "+display_date;
 
   var next_date = new Date(display_date.valueOf());
-  next_date.setDate(next_date.getDate() + 1);
+  next_date.setDate(next_date.getDate() + 7);
   console.log("display_date",display_date, "next_date", next_date)
 
   var day = ("0" + next_date.getDate()).slice(-2);
   var month = ("0" + (next_date.getMonth() + 1)).slice(-2);
 
-  jQuery("#next_button").attr("href", "/daily_tasks/"+next_date.getFullYear()+"-"+month+"-"+day)
+  jQuery("#next_button").attr("href", "/weekly_tasks/"+next_date.getFullYear()+"-"+month+"-"+day)
 
   var prev_date = new Date(display_date.valueOf());
-  prev_date.setDate(prev_date.getDate() - 1);
+  prev_date.setDate(prev_date.getDate() - 7);
   var day = ("0" + prev_date.getDate()).slice(-2);
   var month = ("0" + (prev_date.getMonth() + 1)).slice(-2);
 
-  jQuery("#prev_button").attr("href", "/daily_tasks/"+prev_date.getFullYear()+"-"+month+"-"+day)
+  jQuery("#prev_button").attr("href", "/weekly_tasks/"+prev_date.getFullYear()+"-"+month+"-"+day)
 
   // year, month, day = 
 
@@ -85,26 +88,36 @@
     console.log("filtering")
     var type_input = jQuery("#task_type").val().trim()
     console.log("by ",type_input)
-    var table = $("<table id='task-table-copy' style='width:100%'></table>").text("");
+    for (const weekday of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]) {
 
-    prev_table = jQuery("#hidden-task-table").clone();
-    rows = prev_table.find('> tbody > tr');
-    table.append(rows[0]);
-    console.log(rows.length)
-    for (i = 1; i < (rows.length); i++) {
-      td = rows[i].getElementsByTagName("TD")[0];
-      task_type = td.getElementsByTagName("A")[0].innerHTML.trim();
-      console.log(i, task_type, "space", type_input, "space", task_type==type_input)
-      if (task_type == type_input || "all" == type_input) {
-        table.append(rows[i])
+      console.log("here1", weekday)
+      var table = $("<table id='task-table-copy-"+weekday+"' style='width:100%'></table>").text("");
 
-      } 
-      console.log('here')
+      prev_table = jQuery("#hidden-task-table-"+weekday).clone();
+      rows = prev_table.find('> tbody > tr');
+      // table.append(rows[0]);
+      console.log(rows.length)
+      for (i = 0; i < (rows.length); i++) {
+        td = rows[i].getElementsByTagName("TD")[0];
+        task_type = td.getElementsByTagName("A")[0].innerHTML.trim();
+        console.log(i, task_type, "space", type_input, "space", task_type==type_input)
+        if (task_type == type_input || "all" == type_input) {
+          console.log('here2', task_type == type_input, "all" == type_input)
+          table.append(rows[i])
+
+        } 
+        console.log('here')
+      }
+
+      console.log("removing", "#task-table-"+weekday)
+      jQuery("#task-table-"+weekday).remove()
+      table.attr("id", "task-table-"+weekday)
+      jQuery("#table-container-"+weekday).append(table)
+
+
     }
     
-    jQuery("#task-table").remove()
-    table.attr("id", "task-table")
-    jQuery("#table-container").append(table)
+    
 
   }
 
