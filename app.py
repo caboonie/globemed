@@ -181,6 +181,18 @@ def monthly_tasks(date):
 def task(task_id):
     return render_template("task.html", task=get_task(task_id))
 
+@app.route('/complete_task/<int:task_id>', methods = ['POST'])
+@check_login_wrapper
+def complete_task_page(task_id):
+    complete_task(task_id)
+    return render_template("task.html", task=get_task(task_id))
+
+@app.route('/uncomplete_task/<int:task_id>', methods = ['POST'])
+@check_login_wrapper
+def uncomplete_task_page(task_id):
+    uncomplete_task(task_id)
+    return render_template("task.html", task=get_task(task_id))
+
 @app.route('/add_task',  methods = ['GET', 'POST'])
 @check_login_wrapper
 def add_task():

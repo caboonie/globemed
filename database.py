@@ -85,6 +85,15 @@ def create_task(user, due_date, description, task_type, fields, reminders, remin
 #     session.commit()
 #     return task
 
+def complete_task(task_id):
+    task = session.query(Task).filter_by(id=task_id).first()
+    task.completed = True
+    session.commit()
+
+def uncomplete_task(task_id):
+    task = session.query(Task).filter_by(id=task_id).first()
+    task.completed = False
+    session.commit()    
 
 
 def get_tasks():

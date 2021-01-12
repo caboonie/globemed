@@ -21,6 +21,20 @@
 
 	{% endfor %}
 
+	{% if task.completed %}
+		<form action="/uncomplete_task/{{task.id}}"  method = 'post'>
+		  <div class="form-group" >
+		  	 <button class="btn btn-success" type="submit" >Un-complete Task</button>
+		  </div>
+		</form>
+	{% else %}
+		<form action="/complete_task/{{task.id}}"  method = 'post'>
+		  <div class="form-group" >
+		  	 <button class="btn btn-success" type="submit" >Complete Task</button>
+		  </div>
+		</form>
+	 {% endif %}
+
 
 	<h3>Update Task</h3>
 
