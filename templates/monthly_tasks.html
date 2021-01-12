@@ -59,7 +59,7 @@
              <span class="tooltiptext">{{ notification.task.task_type }}</span></span>
             </a> 
           {% else %}
-            <a href="/task/{{notification.task.id}}">
+            <a href="/task/{{notification.task.id}}" style="font-weight: bold;" class="notification">
              <span class="tooltip2">
                <div style="width:10px; height: 10px; padding: 2px; background-color: {{notification.task.color}}; border: solid 1px black; border-radius: 5px"></div>
              <span class="tooltiptext">{{ notification.task.task_type }}</span></span>
@@ -67,13 +67,13 @@
           {% endif %}
         {% else %}
           {% if notification.task.completed %}
-            <a href="/task/{{notification.task.id}}">
+            <a href="/task/{{notification.task.id}}" class="notification">
              <span class="tooltip2">
                <div style="width:10px; height: 10px; padding: 2px; background-color: grey;"></div>
              <span class="tooltiptext">{{ notification.task.task_type }}</span></span>
            </a>
          {% else %}
-            <a href="/task/{{notification.task.id}}" style="font-weight: bold;">
+            <a href="/task/{{notification.task.id}}" style="font-weight: bold;" class="notification"> 
              <span class="tooltip2">
                <div style="width:10px; height: 10px; padding: 2px; background-color: {{notification.task.color}}; border: solid 2px black;"></div>
              <span class="tooltiptext">{{ notification.task.task_type }}</span></span>
@@ -162,21 +162,21 @@
   function filterByTaskType() {
     console.log("filtering")
     var type_input = jQuery("#task_type").val().trim()
-    console.log("by ",type_input)
     // var table = $("<table id='task-table-copy' style='width:100%'></table>").text("");
     prev_table = jQuery("#hidden-task-table") // .clone();
     rows = prev_table.find('> tbody > tr');
     for (i = 0; i < (rows.length); i++) {
       tds = rows[i].getElementsByTagName("TD")
       for (j = 0; j < tds.length; j++) {
-        notifications = tds[j].getElementsByClass("notification")
+        notifications = tds[j].getElementsByClassName("notification")
         for (k = 0; k < notifications.length; k++) {
-          task_type = td.getElementsByClass("tooltiptext")[0].innerHTML.trim();
+          // console.log("checking notification", notifications)
+          task_type = notifications[k].getElementsByClassName("tooltiptext")[0].innerHTML.trim();
           if (task_type == type_input || "all" == type_input) {
             // table.append(rows[i])
-            notifications[k].css("display", "inline")
+            $(notifications[k]).css("display", "inline")
           } else {
-            notifications[k].css("display", "none")
+            $(notifications[k]).css("display", "none")
           }
         } 
         
