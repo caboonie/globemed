@@ -141,7 +141,8 @@ def daily_tasks_():
 @check_login_wrapper
 def daily_tasks(date):
     print("date", date)
-    return render_template("daily_tasks.html", tasks=get_tasks_day(date), col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), datestring=date)
+    return render_template("daily_tasks.html", tasks=get_tasks_day(date), col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), datestring=date,
+        weekday = datetime.strptime(date, "%Y-%m-%d").strftime("%A"))
 
 
 @app.route('/weekly_tasks/<date>')
