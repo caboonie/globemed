@@ -3,8 +3,8 @@
 {% block body %}
  <!-- TODO make these button pretty arrows -->
   <a href="/daily_tasks/{{datestrings[0]}}">Day</a>
-  <a href="/weekly_tasks/{{datestring[0]}}">Week</a>
-  <a href="/monthly_tasks/{{datestring[0]}}">Month</a>
+  <a href="/weekly_tasks/{{datestrings[0]}}">Week</a>
+  <a href="/monthly_tasks/{{datestrings[0]}}">Month</a>
   <br>
 	<h1 id="day_header" style="display: inline">Tasks for Monday, {{datestrings[0]}} - Sunday {{datestrings[6]}}</h1>
   <br>
@@ -44,7 +44,7 @@
 
 
 <script>
-  var display_date = new Date(Date.parse("{{datestring}}"));
+  var display_date = new Date(Date.parse("{{datestrings[0]}}"));
   display_date =  new Date(display_date.getTime() + display_date.getTimezoneOffset()*60*1000)
   jQuery("#day_header").innerHTML = "Tasks for "+display_date;
 

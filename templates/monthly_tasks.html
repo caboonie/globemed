@@ -53,7 +53,7 @@
         
         {% if notification.is_reminder %}
           {% if notification.task.completed %}
-            <a href="/task/{{notification.task.id}}">
+            <a href="/task/{{notification.task.id}}" class="notification">
              <span class="tooltip2">
                <div style="width:10px; height: 10px; padding: 2px; background-color: grey; border-radius: 5px"></div>
              <span class="tooltiptext">{{ notification.task.task_type }}</span></span>
@@ -163,35 +163,26 @@
     console.log("filtering")
     var type_input = jQuery("#task_type").val().trim()
     console.log("by ",type_input)
-    for (const weekday of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]) {
-
-      console.log("here1", weekday)
-      var table = $("<table id='task-table-copy-"+weekday+"' style='width:100%'></table>").text("");
-
-      prev_table = jQuery("#hidden-task-table-"+weekday).clone();
-      rows = prev_table.find('> tbody > tr');
-      // table.append(rows[0]);
-      console.log(rows.length)
-      for (i = 0; i < (rows.length); i++) {
-        td = rows[i].getElementsByTagName("TD")[0];
-        task_type = td.getElementsByTagName("A")[0].innerHTML.trim();
-        console.log(i, task_type, "space", type_input, "space", task_type==type_input)
-        if (task_type == type_input || "all" == type_input) {
-          console.log('here2', task_type == type_input, "all" == type_input)
-          table.append(rows[i])
-
+    // var table = $("<table id='task-table-copy' style='width:100%'></table>").text("");
+    prev_table = jQuery("#hidden-task-table") // .clone();
+    rows = prev_table.find('> tbody > tr');
+    for (i = 0; i < (rows.length); i++) {
+      tds = rows[i].getElementsByTagName("TD")
+      for (j = 0; j < tds.length; j++) {
+        notifications = tds[j].getElementsByClass("notification")
+        for (k = 0; k < notifications.length; k++) {
+          task_type = td.getElementsByClass("tooltiptext")[0].innerHTML.trim();
+          if (task_type == type_input || "all" == type_input) {
+            // table.append(rows[i])
+            notifications[k].css("display", "inline")
+          } else {
+            notifications[k].css("display", "none")
+          }
         } 
-        console.log('here')
+        
       }
-
-      console.log("removing", "#task-table-"+weekday)
-      jQuery("#task-table-"+weekday).remove()
-      table.attr("id", "task-table-"+weekday)
-      jQuery("#table-container-"+weekday).append(table)
-
-
     }
-    
+
     
 
   }
