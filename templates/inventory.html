@@ -2,77 +2,124 @@
 
 {% block body %}
 
-	<h1>Inventory Overview</h1>
+<style type="text/css">
+	.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+</style>
 
-	<ul>
-		{% for item in inventory %}
-			<li>{{item.name}}: {{item.amount}} {{item.unit.name}}</li>
-		{% endfor %}
-	</ul>
+<script type="text/javascript">
+	function filterInventory(searchbar) {
+		console.log("called")
+		
+		items = document.getElementsByClassName("inventory_item")
+		
+		searchbar = $(searchbar)
+		search_text = searchbar.val().trim().toLowerCase()
+		console.log("filtering, text:", search_text)
+		for (item of items) {
+			// console.log('item:',item, "html", item.innerHTML)
+			if (item.innerHTML.toLowerCase().includes(search_text)) {
+				$(item).css("display", "list-item")
+			} else {
+				$(item).css("display", "none")
+			}
+		}
+	}
 
-	
+</script>
 
-	<h3>Add Inventory Item</h3>
-	<form action="{{ url_for('add_item_page') }}" method = 'post'>
-  	  <input required type="text"  name="item_name" placeholder="Item Name...">
-  	  <input required type="number" step="0.01" name="amount" placeholder="Amount...">
+	<div class="row">
+		<div style="width: 70%; float: left; ">
+			<h1>Inventory Overview</h1>
+			<input onkeyup ="filterInventory(this)" id="item_filter" type="" name="" placeholder="Search for item...">
 
-  	  <label for="unit_name">Units: </label>
-  	  <select required name="unit_name" id="unit_name">
-	  	<option value=""></option>
-	  	{% for unit in units %}
-		    <option value="{{unit.name}}">{{unit.name}}</option>
-	    {% endfor %}
-	  </select>
+			<ul id="inventory_list">
+				{% for item in inventory %}
+					<li class="inventory_item">{{item.name}}: {{item.amount}} {{item.unit.name}}</li>
+				{% endfor %}
+			</ul>
+		</div>
+		<div style="width: 30%; float: left; border: solid 3px lightgrey; padding: 5px; border-radius: 3px;">
+		
+		
 
-  	  <button class="btn btn-success" type="submit" > Add Item </button>
-	 </form>
+		
 
-	 <h3>Change Amount</h3>
-	 <form action="{{ url_for('change_item_amount_page') }}" method = 'post'>
-	 	<label for="change_item_name">Item: </label>
-  	  <select required name="item_name" id="change_item_name">
-	  	<option value=""></option>
-	  	{% for item in inventory %}
-		    <option value="{{item.name}}">{{item.name}} ({{item.unit.abbreviation}})</option>
-	    {% endfor %}
-	  </select>
+			<h3>Add Inventory Item</h3>
+			<form action="{{ url_for('add_item_page') }}" method = 'post'>
+		  	  <input required type="text"  name="item_name" placeholder="Item Name...">
+		  	  <input required type="number" step="0.01" name="amount" placeholder="Amount...">
+		  	  <br>
+		  	  <label for="unit_name">Units: </label>
+		  	  <select required name="unit_name" id="unit_name">
+			  	<option value=""></option>
+			  	{% for unit in units %}
+				    <option value="{{unit.name}}">{{unit.name}}</option>
+			    {% endfor %}
+			  </select>
+			  <br>
 
-  	  <input required type="number" step="0.01" name="amount" placeholder="Amount to change by...">
+		  	  <button class="btn btn-success" type="submit" > Add Item </button>
+			 </form>
 
-  	  <button class="btn btn-success" type="submit" > Change Amount </button>
-	 </form>
+			 <br>
 
-	 <h3>Set Amount</h3>
-	 <form action="{{ url_for('set_item_amount_page') }}" method = 'post'>
-	 	<label for="change_item_name">Item: </label>
-  	  <select required name="item_name" id="change_item_name">
-	  	<option value=""></option>
-	  	{% for item in inventory %}
-		    <option value="{{item.name}}">{{item.name}} ({{item.unit.abbreviation}})</option>
-	    {% endfor %}
-	  </select>
+			 <h3>Change Amount</h3>
+			 <form action="{{ url_for('change_item_amount_page') }}" method = 'post'>
+			 	<label for="change_item_name">Item: </label>
+		  	  <select required name="item_name" id="change_item_name">
+			  	<option value=""></option>
+			  	{% for item in inventory %}
+				    <option value="{{item.name}}">{{item.name}} ({{item.unit.abbreviation}})</option>
+			    {% endfor %}
+			  </select>
 
-  	  <input required type="number" step="0.01" name="amount" placeholder="Amount...">
+		  	  <input required type="number" step="0.01" name="amount" placeholder="Amount to change by...">
 
-  	  <button class="btn btn-success" type="submit" > Set Item Amount</button>
-	 </form>
+		  	  <button class="btn btn-success" type="submit" > Change Amount </button>
+			 </form>
+
+			 <br>
+
+			 <h3>Set Amount</h3>
+			 <form action="{{ url_for('set_item_amount_page') }}" method = 'post'>
+			 	<label for="set_item_name">Item: </label>
+		  	  <select required name="item_name" id="set_item_name">
+			  	<option value=""></option>
+			  	{% for item in inventory %}
+				    <option value="{{item.name}}">{{item.name}} ({{item.unit.abbreviation}})</option>
+			    {% endfor %}
+			  </select>
+
+		  	  <input required type="number" step="0.01" name="amount" placeholder="Amount...">
+
+		  	  <button class="btn btn-success" type="submit" > Set Item Amount</button>
+			 </form>
+
+			 <br>
 
 
-	 <h3>Existing Units</h3>
-	<ul>
-	{% for unit in units %}
-		<li>{{unit.name}} ({{unit.abbreviation}})</li>
-	{% endfor %}
-	</ul>
+			 <h3>Existing Units</h3>
+			<ul>
+			{% for unit in units %}
+				<li>{{unit.name}} ({{unit.abbreviation}})</li>
+			{% endfor %}
+			</ul>
 
-	<h3>Add Unit</h3>
-	<form action="{{ url_for('add_unit_page') }}" method = 'post'>
-  	  <input  required type="text"  name="unit_name" placeholder="Unit...">
-  	  <input  type="text"  name="abbreviation" placeholder="Abbreviation (optional)">
-  	  <button class="btn btn-success" type="submit" > Add Unit </button>
-	</form>
+			<br>
 
+			<h3>Add Unit</h3>
+			<form action="{{ url_for('add_unit_page') }}" method = 'post'>
+		  	  <input  required type="text"  name="unit_name" placeholder="Unit...">
+		  	  <input  type="text"  name="abbreviation" placeholder="Abbreviation (optional)">
+		  	  <button class="btn btn-success" type="submit" > Add Unit </button>
+			</form>
+
+		</div>
+	</div>
 
 
 
