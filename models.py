@@ -59,3 +59,18 @@ class TaskType(Base):
     optional_fields = Column(PickleType) # list of strings that are allowed but not required keys in the fields entry of a task
     reminders = Column(PickleType) # list of dates for when reminders should go off
     color = Column(String)
+
+# Inventory Models
+class Unit(Base):
+    __tablename__ = "units"
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    abbreviation = Column(String)
+
+class InventoryItem(Base):
+    __tablename__ = "inventory_item"
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    amount = Column(Float)
+    unit = Column(PickleType)
+

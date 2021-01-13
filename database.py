@@ -77,6 +77,16 @@ def create_task(user, due_date, description, task_type, fields, reminders, remin
     session.commit()
     return True, task
 
+def update_task(task_id, due_date, description, task_type, fields, reminders, reminder_datestrings):
+    task = session.query(Task).filter_by(id=task_id).first()
+    task.due_date = due_date
+    task.description = description
+    task.task_type = task_type
+    task.fields = fields
+    task.reminders = reminders
+    task.reminder_datestrings = reminder_datestrings
+    session.commit()
+
 # def create_appointment(user, due_date, description, patient_name):
 #     task = Appointment(creator_id=user.id, created_datetime=datetime.now(), created_datestring=datetime.now().strftime("%m/%d/%Y"), due_datetime=due_date, due_datestring=due_date.strftime("%m/%d/%Y"), 
 #         description=description, task_type='appointment', patient_name=patient_name)
@@ -157,3 +167,61 @@ def search_descr(search_text):
 # create_task(session.query(User).filter_by(username='admin').first(), datetime.now(), "test", "appointment", {"Patient name":"caleb"}, [], [])
 # create_task(session.query(User).filter_by(username='admin').first(), datetime.now(), "test2", "prescription")
 # create_appointment(session.query(User).filter_by(username='admin').first(), datetime.now(), "tes;sdlkjf;ladskjfl;asdlkldjfklsdfj kdjklfsdj;lkfjksdl akdlfjkdsj dlakfjdskljf slkdfjlkdsjfdslkj sdflkjdslkjt", "caleb")
+
+
+# Inventory Interface
+
+def add_unit(unit_name, abbreviation=None):
+    if abbreviation == None:
+        abbreviation = unit_name
+    unit = Unit(name=unit_name, abbreviation=abbreviation)
+    session.add(unit)
+    session.commit()
+
+def get_unit(unit_id):
+    return session.query(Unit).filter_by(id=unit_id).first()
+
+def get_unit_by_name(unit_name):
+    return session.query(Unit).filter_by(name=unit_name).first()
+
+def get_units():
+    return session.query(Unit).all()
+
+if get_unit_by_name("grams") == None:
+    add_unit("grams", "g")
+
+
+def get_inventory_item(id):
+    return session.query(InventoryItem).filter_by(id=id).first()
+
+def get_inventory_item_by_name(name):
+    return session.query(InventoryItem).filter_by(name=name).first()
+
+def get_inventory():
+    return session.query(InventoryItem).all()
+
+def add_inventory_item(name, init_amount, unit_object):
+    # print("check", get_inventory_item_by_name(name), get_inventory_item_by_name(name)==None, type(get_inventory_item_by_name(name)))
+    if get_inventory_item_by_name(name) != None:
+        return False, "Already added"
+    item = InventoryItem(name=name, amount=init_amount, unit=unit_object)
+    session.add(item)
+    session.commit()
+    return True, "Successfully added"
+
+def update_inventory_item(item_name, amount_diff):
+    item = get_inventory_item_by_name(item_name)
+    item.amount = item.amount + amount_diff
+    session.commit()
+
+def set_inventory_item(item_name, amount):
+    item = get_inventory_item_by_name(item_name)
+    item.amount = amount
+    session.commit()
+
+if get_inventory_item_by_name("Tylenol") == None:
+    print("adding Tylenol")
+    print(add_inventory_item("Tylenol", 100.5, get_unit_by_name("grams")))
+print("Tylenol there?", get_inventory_item_by_name("Tylenol"))
+
+

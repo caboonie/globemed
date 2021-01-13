@@ -180,7 +180,10 @@ def monthly_tasks(date):
 @app.route('/task/<int:task_id>')
 @check_login_wrapper
 def task(task_id):
-    return render_template("task.html", task=get_task(task_id))
+    if get_task(task_id) == None:
+        flash("Task with id {} does not exist".format(task_id))
+        return redirect(url_for('tasks'))
+    return render_template("task.html", task=get_task(task_id), task_type=get_task_type_by_name(get_task(task_id).task_type), units=UNITS)
 
 @app.route('/complete_task/<int:task_id>', methods = ['POST'])
 @check_login_wrapper
@@ -218,8 +221,35 @@ def add_task():
             elif field not in ["task_type", "due_date", "description"]: # TODO - don't let the use make custom fields using these names
                 fields[field] = request.form[field]
         succeeded, msg = create_task(get_user(login_session["username"]), due_date, description, task_type_name, fields, reminders, reminder_datestrings)
-        flash("Task added successfully!")
+        if succeeded:
+            flash("Task added successfully!")
+        else:
+            flash(msg)
         return render_template("add_task.html", task_types=get_task_types())
+
+@app.route('/update_task/<int:task_id>',  methods = ['POST'])
+@check_login_wrapper
+def update_task():
+    task_type_name = request.form['task_type']
+    task_type = get_task_type_by_name(task_type_name)
+    due_date_str = request.form["due_date"]
+    due_date = datetime.strptime(due_date_str, '%Y-%m-%d')
+    description = request.form["description"]
+    fields = {}
+    reminders = []
+    reminder_datestrings = []
+    for field in request.form:
+        if field[:8] == "reminder":
+            reminder_date_str = request.form[field]
+            reminder_date = datetime.strptime(reminder_date_str, '%Y-%m-%d')
+            reminders.append(reminder_date)
+            reminder_datestrings.append(reminder_date_str)
+        elif field not in ["task_type", "due_date", "description"]: # TODO - don't let the use make custom fields using these names
+            fields[field] = request.form[field]
+    update_task(task_id, due_date, description, task_type_name, fields, reminders, reminder_datestrings)
+    flash("Task added successfully!")
+    return render_template("task.html", task=get_task(task_id))
+
 
 @app.route('/search',  methods = ['GET', 'POST'])
 @check_login_wrapper
@@ -238,7 +268,40 @@ def search():
 
 # need to be able to filter and sort tasks on task page using javascript
 
-    
+@app.route('/inventory')  
+@check_login_wrapper
+def inventory():
+    print("inventory", get_inventory())
+    return render_template("inventory.html", inventory=get_inventory(), units = get_units())
+
+@app.route('/add_unit', methods = ['POST'])  
+@check_login_wrapper
+def add_unit_page():
+    if "abbreviation" not in request.form:
+        abbreviation = request.form["unit_name"]
+    else:
+        abbreviation = request.form["abbreviation"]
+    add_unit(request.form["unit_name"], abbreviation)
+    return redirect(url_for('inventory'))
+
+@app.route('/add_item', methods = ['POST'])  
+@check_login_wrapper
+def add_item_page():
+    unit = get_unit_by_name(request.form["unit_name"])
+    add_inventory_item(request.form["item_name"], float(request.form["amount"]), unit)
+    return redirect(url_for('inventory'))
+
+@app.route('/set_item', methods = ['POST'])  
+@check_login_wrapper
+def set_item_amount_page():
+    set_inventory_item(request.form["item_name"], float(request.form["amount"]))
+    return redirect(url_for('inventory'))
+
+@app.route('/change_item', methods = ['POST'])  
+@check_login_wrapper
+def change_item_amount_page():
+    update_inventory_item(request.form["item_name"], float(request.form["amount"]))
+    return redirect(url_for('inventory'))
 
 
 if __name__ == '__main__':
