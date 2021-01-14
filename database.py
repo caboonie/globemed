@@ -164,6 +164,39 @@ def search_descr(search_text):
             filtered_tasks.append(task)
     return filtered_tasks
 
+def advanced_search(keywords=[], names=[], fields=[], start_date=None, end_date=None, task_type=None):
+    ranked_tasks = []
+    for task in get_tasks():
+        if start_date:
+            if datetime.strptime(start_date, "%Y-%m-%d") > task.due_datetime:
+                continue
+        if end_date:
+            if datetime.strptime(end_date, "%Y-%m-%d") < task.due_datetime:
+                continue
+        if task_type and task_type != task.task_type:
+            continue
+        matches = 0
+        for keyword in keywords:
+            if keyword.lower() in "".join([task.description.lower(), task.task_type.lower()]+[field.lower() for field in task.fields]+[task.fields[field].lower() for field in task.fields]):
+                matches += 1
+        name_field = None
+        if "name" in task.fields:
+            name_field = "name"
+        elif "Name" in task.fields:
+            name_field = "Name"
+        if name_field:
+            for name in names:
+                if name.lower() in task.fields[name_field].lower():
+                    matches += 1
+        for field in fields:
+            if field.lower() in [key.lower() for key in task.fields]:
+                matches += 1
+        if matches > 0:
+            ranked_tasks.append((task, matches))
+    ranked_tasks.sort(key=lambda x:-x[1])
+    return [pair[0] for pair in ranked_tasks]
+
+
 # create_task(session.query(User).filter_by(username='admin').first(), datetime.now(), "test", "appointment", {"Patient name":"caleb"}, [], [])
 # create_task(session.query(User).filter_by(username='admin').first(), datetime.now(), "test2", "prescription")
 # create_appointment(session.query(User).filter_by(username='admin').first(), datetime.now(), "tes;sdlkjf;ladskjfl;asdlkldjfklsdfj kdjklfsdj;lkfjksdl akdlfjkdsj dlakfjdskljf slkdfjlkdsjfdslkj sdflkjdslkjt", "caleb")

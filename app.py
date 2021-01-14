@@ -23,7 +23,7 @@ def check_login_wrapper(func):
 @app.route('/')
 @check_login_wrapper
 def home():
-    return redirect(url_for('tasks'))
+    return redirect(url_for('daily_tasks_'))
     # return render_template("tasks.html", tasks=get_tasks())
 
 @app.route("/login", methods = ['GET', 'POST'])
@@ -135,7 +135,8 @@ def tasks():
 @check_login_wrapper
 def daily_tasks_():
     date = datetime.now().strftime("%Y-%m-%d")
-    return render_template("daily_tasks.html", tasks=get_tasks_day(date), col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), datestring=date)
+    return render_template("daily_tasks.html", tasks=get_tasks_day(date), col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), datestring=date,
+        weekday = datetime.strptime(date, "%Y-%m-%d").strftime("%A"))
 
 @app.route('/daily_tasks/<date>')
 @check_login_wrapper
@@ -260,11 +261,48 @@ def search():
 
         search_text = request.form['search']
         print(search_text)
+        results = advanced_search(keywords = search_text.split(" "))
+        print("results:", results)
         # return render_template("search_result.html", tasks=search_descr(search_text))
-        return render_template("tasks.html", tasks=search_descr(search_text), col_strings = ["Due Date"], col_vars = ["due_datestring"])
+        return render_template("search.html", tasks=results, col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types())
     # tokenize search texts, then return results sorted in order of number of matches
     # can make a more advanced search - only searching in description, task_type, patient_name entries, etc
 
+
+@app.route('/advanced_search',  methods = ['GET', 'POST'])
+@check_login_wrapper
+def advanced_search_page():
+    if request.method == 'GET':
+        return render_template("tasks.html")
+    else:
+        keywords = []
+        if "keywords" in request.form:
+            keywords = request.form['keywords'].split(" ")
+
+        names = []
+        if "names" in request.form:
+            names = request.form['names'].split(" ")
+
+        fields = []
+        if "fields" in request.form:
+            fields = request.form['fields'].split(" ")
+
+        start_date = None
+        if "start_date" in request.form:
+            start_date = request.form['start_date']
+
+        end_date = None
+        if "end_date" in request.form:
+            end_date = request.form['end_date']
+
+        task_type = None
+        if "task_type" in request.form:
+            task_type = request.form["task_type"]
+
+        results = advanced_search(keywords = keywords, names = names, fields = fields, start_date=start_date, end_date=end_date, task_type=task_type)
+        # return render_template("search_result.html", tasks=search_descr(search_text))
+        return render_template("search.html", tasks=results, col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(),
+            keywords=" ".join(keywords), names = " ".join(names), fields = " ".join(fields), start_date=start_date, end_date=end_date, task_type=task_type)
 
 # need to be able to filter and sort tasks on task page using javascript
 

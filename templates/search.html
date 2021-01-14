@@ -1,0 +1,140 @@
+{% extends "layout.html" %}
+
+{% block body %}
+  <h1>search Options</h1>
+    <form action="{{ url_for('advanced_search_page') }}" method = 'post'>
+
+          <input type="text" id="keywords"  name="keywords" placeholder="Keyword(s)..." value="{{keywords}}">
+          <input  type="text" name="names" placeholder="Name(s)..." value="{{names}}">
+          <input  type="text" name="fields" placeholder="Field(s)..." value="{{fields}}">
+          <label for="start_date">Min Date: </label><input id="start_date" type="date" name="start_date">
+          <label for="end_date">Max Date: </label><input id="end_date" type="date" name="end_date">
+          <br>
+          <label for="task_type">Task Type: </label>
+          <select name="task_type" id="task_type_search">
+          <option value=""></option>
+          {% for task_type in task_types %}
+            <option value="{{task_type.task_type}}">{{task_type.task_type}}</option>
+          {% endfor %}
+        </select>
+        <br>
+
+          <button class="btn btn-success" type="submit" > Search </button>
+       </form>
+
+	<h1>Search Results</h1>
+
+  <h3>Filter by task type:</h3>
+  <select id="task_type" name="task_type" onchange="filterByTaskType()">
+    <option value="all">all</option>
+    {% for task_type in task_types %}
+      <option value="{{task_type.task_type}}">{{task_type.task_type}}</option>
+    {% endfor %}
+  </select>
+
+  <div id="table-container">
+	  <table id="hidden-task-table" style="display: none;">
+  		<tr>
+  			<th> Type <button onclick="sortTable(0)">^</button> <button onclick="sortTable(0, true)">v</button></th>
+  			<th>Description <button onclick="sortTable(1)">^</button> <button onclick="sortTable(1, true)">v</button></th>
+  			{% for col in col_strings %}
+  				<th> {{ col }} <button onclick="sortTable( {{loop.index+1}} )">^</button> <button onclick="sortTable({{loop.index+1}}, true)">v</button></th>
+  			{% endfor %}
+  	        
+  	    </tr>
+  	{% for task in tasks %}
+  		<tr class="task-row">
+  			<td><a href="/task/{{task.id}}"> {{ task.task_type }} </a></td>
+  			{% if task.description|length > 20 %}
+  		        <td class="desc-col"> {{ task.description[:20] }} <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></td>
+  		    {% else %}
+  		    	<td class="desc-col"> {{ task.description }} </td>
+  		    {% endif %}
+  	        <!-- <td> {{ task.due_datestring }} </td> -->
+  	        {% for col in col_vars %}
+  				<td> {{ task[col] }} </td>
+  			{% endfor %}
+  	    </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+
+<script>
+
+
+    
+  function filterByTaskType() {
+    console.log("filtering")
+    var type_input = jQuery("#task_type").val().trim()
+    console.log("by ",type_input)
+    var table = $("<table id=task-table-copy></table>").text("");
+
+    prev_table = jQuery("#hidden-task-table").clone();
+    rows = prev_table.find('> tbody > tr');
+    table.append(rows[0]);
+    console.log(rows.length)
+    for (i = 1; i < (rows.length); i++) {
+      td = rows[i].getElementsByTagName("TD")[0];
+      task_type = td.getElementsByTagName("A")[0].innerHTML.trim();
+      console.log(i, task_type, "space", type_input, "space", task_type==type_input)
+      if (task_type == type_input || "all" == type_input) {
+        table.append(rows[i])
+
+      } 
+      console.log('here')
+    }
+    
+    jQuery("#task-table").remove()
+    table.attr("id", "task-table")
+    jQuery("#table-container").append(table)
+
+  }
+
+filterByTaskType("all");
+
+function sortTable(index, reverse=false) {
+  console.log("sorting index", index);
+  var table, rows, switching, i, x, y, shouldSwitch;
+  table = document.getElementById("task-table");
+  switching = true;
+  /*Make a loop that will continue until
+  no switching has been done:*/
+  while (switching) {
+  	console.log("here");
+    //start by saying: no switching is done:
+    switching = false;
+    rows = table.rows;
+    /*Loop through all table rows (except the
+    first, which contains table headers):*/
+    for (i = 1; i < (rows.length - 1); i++) {
+      //start by saying there should be no switching:
+      shouldSwitch = false;
+      /*Get the two elements you want to compare,
+      one from current row and one from the next:*/
+      x = rows[i].getElementsByTagName("TD")[index];
+      y = rows[i + 1].getElementsByTagName("TD")[index];
+      if (index==0) {
+        x = x.getElementsByTagName("A")[0];
+        y = y.getElementsByTagName("A")[0];
+      }
+      
+      //check if the two rows should switch place:
+      if (((x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) && !reverse) || ( reverse &&  (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) ) ) {
+      	console.log("comparing", x.innerHTML.toLowerCase(), y.innerHTML.toLowerCase())
+        //if so, mark as a switch and break the loop:
+        shouldSwitch = true;
+        break;
+      }
+    }
+    if (shouldSwitch) {
+      /*If a switch has been marked, make the switch
+      and mark that a switch has been done:*/
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+    }
+  }
+}
+</script>
+
+{%endblock%}
