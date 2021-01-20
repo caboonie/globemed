@@ -4,35 +4,35 @@
 
   
 
-  <h1>Admin Dashboard</h1>
+  <h1>{{text['Admin Dashboard']}}</h1>
 
   <form action="{{ url_for('add_user') }}" method = 'post'>
-  	<h2>Create a New User</h2>
+  	<h2>{{text['Create a New User']}}</h2>
     <div class="form-group">
-      <input id="input_username1" class="username form-control" type="text" name="username" placeholder="Username">
+      <input id="input_username1" class="username form-control" type="text" name="username" placeholder="{{text['Username']}}">
     </div>
 
     <div class="form-group">
-      <input id="input_password1" class="username form-control" type="text" name="password" placeholder="Password">
+      <input id="input_password1" class="username form-control" type="text" name="password" placeholder="{{text['Password']}}">
     </div>
 
     <input type="checkbox" name="is_admin" value="is_admin">
-	  <label for="is_admin"> Is an admin.</label><br>
+	  <label for="is_admin"> {{text['Is an admin']}} </label><br>
 
-    <button class="btn btn-success" type="submit" id="submit_new_user"> Add New User </button>
+    <button class="btn btn-success" type="submit" id="submit_new_user"> {{text['Add New User']}} </button>
   </form>
 
 
-  <h2>Existing Task Types</h2>
+  <h2>{{text['Existing Task Types']}}</h2>
   <p> TODO search filter here </p>
   <ul>
   {% for task_type in task_types %}
     <li>{{task_type.task_type}}
       <ul>
         <li> TODO - make these a popup?</li>
-        <li>Required: {% for field in task_type.required_fields %} {{field}}, {% endfor %} </li>
-        <li>Optional: {% for field in task_type.optional_fields %} {{field}}, {% endfor %} </li> 
-        <li>Reminders: {% for reminder in task_type.reminders %}  {{reminder.amount}} {{reminder.unit}}(s), {% endfor %} </li>
+        <li>{{text['Required']}}: {% for field in task_type.required_fields %} {{field}}, {% endfor %} </li>
+        <li>{{text['Optional']}}: {% for field in task_type.optional_fields %} {{field}}, {% endfor %} </li> 
+        <li>{{text['Reminders']}}: {% for reminder in task_type.reminders %}  {{reminder.amount}} {{reminder.unit}}(s), {% endfor %} </li>
       </ul>
     </li>
 
@@ -41,10 +41,10 @@
 
   <!-- create new task types with appropriate fields... -->
   <form action="{{ url_for('add_task_type') }}" method = 'post'>
-    <h2>Create a New Task Type</h2>
+    <h2>{{text['Create a New Task Type']}}</h2>
     <div class="form-group">
-      <input id="task_type" class="username form-control" type="text" name="task_type" placeholder="Task Type" required>
-      <label for="task_color">Select color:</label>
+      <input id="task_type" class="username form-control" type="text" name="task_type" placeholder="{{text['Task Type']}}" required>
+      <label for="task_color">{{text['Select color']}}:</label>
       <input type="color" id="task_color" name="task_color" value="#ff0000">
     </div>
 
@@ -52,8 +52,8 @@
         
     </div>
 
-    <button type="button" onclick="addField()" style="margin: 10px;">Add Text Field</button>
-    <button type="button" onclick="addOptionField()" style="margin: 10px;">Add Option Field</button>
+    <button type="button" onclick="addField()" style="margin: 10px;">{{text['Add Text Field']}}</button>
+    <button type="button" onclick="addOptionField()" style="margin: 10px;">{{text['Add Option Field']}}</button>
 
     <div id="task_reminders" class="form_group">
     </div>
@@ -61,19 +61,19 @@
     <!-- templates for cloning -->
     <div style="display: none;">
 
-        <input id="text_field_template" class="username form-control" type="text" name="field" placeholder="Text Field">
+        <input id="text_field_template" class="username form-control" type="text" name="field" placeholder="{{text['Text Field']}}">
 
 
-        <span id="required_label">Required: </span>
+        <span id="required_label">{{text['Required']}}: </span>
         <input class="pointer" type="checkbox" id="required_template" name="required_template" value="required" checked>
-        <button id="remove_template" type="button" style="margin: 10px">Remove</button>
+        <button id="remove_template" type="button" style="margin: 10px">{{text['Remove']}}</button>
         <!-- Todo make this remove a little X on the side -->
 
         <div id="choice_field_template">        </div>
 
-        <input id="option_template" class="username form-control" type="text" name="option" placeholder="Option">
-        <button type="button" id="add_template"  style="margin: 10px;">Add Option</button>
-        <span id="other_label">Allow Other: </span>
+        <input id="option_template" class="username form-control" type="text" name="option" placeholder="{{text['Option']}}">
+        <button type="button" id="add_template"  style="margin: 10px;">{{text['Add Option']}}</button>
+        <span id="other_label">{{text['Allow Other']}}: </span>
         <input class="pointer" type="checkbox" id="other_template" name="other_template" value="other" checked>
 
         <div id="reminder_box"></div>
@@ -86,11 +86,11 @@
 
     </div>
     
-    <button type="button" onclick="addReminder()" style="margin: 10px;">Add Reminder</button>
+    <button type="button" onclick="addReminder()" style="margin: 10px;">{{text['Add Reminder']}}</button>
     <br>
 
 
-    <button class="btn btn-success" type="submit" id="submit_new_user"> Add Task Type </button>
+    <button class="btn btn-success" type="submit" id="submit_new_user"> {{text['Add Task Type']}} </button>
   </form>
 
 

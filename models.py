@@ -67,10 +67,19 @@ class Unit(Base):
     name = Column(String)
     abbreviation = Column(String)
 
+class InventoryType(Base):
+    __tablename__ = "inventory_type"
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+
 class InventoryItem(Base):
     __tablename__ = "inventory_item"
     id = Column(Integer, primary_key=True)
     name = Column(String)
     amount = Column(Float)
     unit = Column(PickleType)
+    inventory_type = Column(PickleType)
+    danger_amount = Column(Float)
+    buy_more_amount = Column(Float)
+
 

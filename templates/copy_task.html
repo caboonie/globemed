@@ -2,7 +2,7 @@
 
 {% block body %}
 
-	<h1>{{text['Add Task']}} </h1>
+	<h1>Copy Task</h1>
 <!-- div for each type and based on javascript, fade in the appropriate fields for that task 
  -->
 
@@ -35,8 +35,8 @@
   	// 	this.innerHTML = this.data("amount") + " " + this.data("unit") + "(s) before due date."
   	// }
 
-  	function calculateAllDates(index) {
-  		var due_date = new Date(jQuery("#due_date_"+index).val());
+  	function calculateAllDates() {
+  		var due_date = new Date(jQuery("#due_date").val());
   		var due_date = new Date(due_date.getTime() + due_date.getTimezoneOffset()*60*1000) // correct for timezone offset
   		// console.log("due_date", due_date, due_date.getTime(),  due_date.getTimezoneOffset()*60*1000, new_due_date)
   		jQuery(".reminder").each(function(){
@@ -65,13 +65,6 @@
   </script>
 
 
-  <h3>{{text['Choose a task type']}}:</h3>
-  <select id="task_type" name="task_type" onchange="updateFields()">
-  	<option value=""></option>
-  	{% for task_type in task_types %}
-	    <option value="{{task_type.task_type}}">{{task_type.task_type}}</option>
-    {% endfor %}
-  </select>
 
   <!-- I want the value of this select to cause one of -->
   <!-- templates for cloning -->
@@ -81,21 +74,20 @@
         <input id="reminder_date_template" class="username form-control" type="date" name="reminder_number">
     </div>
 
-  {% for task_type in task_types %}
-  {% set outer_loop = loop %}
-  <form action="{{ url_for('add_task') }}" id="container_{{task_type.task_type}}" style="display: none" method = 'post'>
+
+  <form action="{{ url_for('add_task') }}" id="container_{{task_type.task_type}}" method = 'post'>
   	<input style="display: none" type="text"  name="task_type" value="{{task_type.task_type}}">
 	  <div class="form-group" >
 	  	
-	  	<div>{{text['Required Fields']}}: </div>
-	  	<label for="due_date">{{text['Due Date']}}: </label><input class="required_{{task_type.task_type}}"  type="date" id="due_date_{{loop.index}}" name="due_date" onchange="calculateAllDates({{loop.index}})">
+	  	<div>{{text['Required Fields']}}</div>
+	  	<label for="due_date">{{text['Due Date']}}: </label><input value="{{task.due_datestring}}" class="required_{{task_type.task_type}}"  type="date" id="due_date" name="due_date" onchange="calculateAllDates()">
 	  	<!-- TODO - for some reason, description isn't required??? -->
-	  	<label for="description">{{text['Description']}}: </label><textarea class="required_{{task_type.task_type}}" name="description" rows="4" cols="50"> </textarea>
+	  	<label for="description">Description: </label><textarea  class="required_{{task_type.task_type}}" name="description" rows="4" cols="50">{{task.description}}</textarea>
 	  	{% for field in task_type.required_fields %}
 	  		{% if field is mapping %}
 	  			{% for key in field %}
 	  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:</label>
-	  				<select class="required_{{task_type.task_type}}" id="{{task_type.task_type}}_{{key}}" name="{{key}}" >
+	  				<select value="{{task.fields[field]}}" class="required_{{task_type.task_type}}" id="{{task_type.task_type}}_{{key}}" name="{{key}}" >
 					  	<option value=""></option>
 					  	{% for option in field[key] %}
 						    <option value="{{option}}">{{option}}</option>
@@ -103,17 +95,17 @@
 					  </select>
 	  			{% endfor %}
 	  		{% else %}
-		  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input class="required_{{task_type.task_type}}" type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
+		  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input value="{{task.fields[field]}}" class="required_{{task_type.task_type}}" type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
 		  	{% endif %}
 	  	{% endfor %}
 
 	  	{% if (task_type.optional_fields | length) > 0%}
-		  	<div>{{text['Optional Fields']}}: </div>
+		  	<div>{{text['Optional Fields']}}</div>
 		  	{% for field in task_type.optional_fields %}
 			  	{% if field is mapping %}
 		  			{% for key in field %}
 		  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:</label>
-		  				<select id="{{task_type.task_type}}_{{key}}" name="{{key}}" >
+		  				<select value="{{task.fields[field]}}" id="{{task_type.task_type}}_{{key}}" name="{{key}}" >
 						  	<option value=""></option>
 						  	{% for option in field[key] %}
 							    <option value="{{option}}">{{option}}</option>
@@ -121,17 +113,17 @@
 						  </select>
 		  			{% endfor %}
 		  		{% else %}
-		  			<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
+		  			<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input value="{{task.fields[field]}}" type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
 		  		{% endif %}
 		  	{% endfor %}
 		{% endif %}
 
 		<div id="task_reminders_{{task_type.task_type}}" class="form_group">
-		  	<div>{{text['Current Reminders']}}:</div>
+		  	<div>{{text['Current Reminders']}}</div>
 		  	{% for reminder in task_type.reminders %}
 		  		<div id="field_{{loop.index}}">
-			  		<p>Automatically {{reminder.amount}} {{reminder.unit}}(s) before (but user can adjust): </p>
-			  		<input name="reminder_{{loop.index}}" type="date" id="reminder_{{outer_loop.index}}_{{loop.index}}" class="reminder" data-amount="{{reminder.amount}}" data-unit="{{reminder.unit}}" data-user-changed="false" onchange="userChange(this)">
+			  		<p> {{reminder.amount}} {{reminder.unit}}(s): </p>
+			  		<input value="{{task.reminders[loop.index]}}" name="reminder_{{loop.index}}" type="date" id="reminder_{{outer_loop.index}}_{{loop.index}}" class="reminder" data-amount="{{reminder.amount}}" data-unit="{{reminder.unit}}" data-user-changed="false" onchange="userChange(this)">
 			  		<button id="remove_template" type="button" style="margin: 10px" onclick="removeField({{loop.index}})">{{text['Remove']}}</button>
 			  	</div>
 		  	{% endfor %}
@@ -147,7 +139,6 @@
 	 
 
 
-  {% endfor %}
 
 
 <script type="text/javascript">

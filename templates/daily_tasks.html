@@ -1,20 +1,26 @@
 {% extends "layout.html" %}
 
 {% block body %}
+
+
+
  <!-- TODO make these button pretty arrows -->
-  <a href="/daily_tasks/{{datestring}}">Day</a>
-  <a href="/weekly_tasks/{{datestring}}">Week</a>
-  <a href="/monthly_tasks/{{datestring}}">Month</a>
+ <span style="font-size: 18px; color: grey;">{{text['Tasks by']}}: </span>
+  <a class="pretty-button" href="/daily_tasks/{{datestring}}">{{text['Day']}}</a>
+  <a class="pretty-button" href="/weekly_tasks/{{datestring}}">{{text['Week']}}</a>
+  <a class="pretty-button" href="/monthly_tasks/{{datestring}}">{{text['Month']}}</a>
   <br>
-	<h1 id="day_header" style="display: inline">Tasks for {{weekday}}, {{datestring}}</h1>
   <br>
-  <a id="prev_button"><- </a>
-  <a id="next_button"> -></a>
+  <h1 id="month_header" style="display: inline">{{text['Tasks for']}} {{weekday}}, {{datestring}}</h1>
+  <br>
+  <a  id="prev_button"><img  src="{{url_for('static', filename='arrow_left.png')}}" class="arrow"></a>
+  <a  id="next_button"><img  src="{{url_for('static', filename='arrow_right.png')}}" class="arrow"></a>
+  <br>
   <br>
 
-  <h3>Choose a task type:</h3>
+  <h3>{{text['Choose a task type']}}:</h3>
   <select id="task_type" name="task_type" onchange="filterByTaskType()">
-    <option value="all">all</option>
+    <option value="all">{{text['all']}}</option>
     {% for task_type in task_types %}
       <option value="{{task_type.task_type}}">{{task_type.task_type}}</option>
     {% endfor %}
@@ -23,10 +29,19 @@
   <div id="table-container">
 	  <table id="hidden-task-table" style="display: none; width:100%;">
   		<tr>
-  			<th> Type <button onclick="sortTable(0)">^</button> <button onclick="sortTable(0, true)">v</button></th>
-  			<th>Description <button onclick="sortTable(1)">^</button> <button onclick="sortTable(1, true)">v</button></th>
+  			<th> {{text['Task Type']}} 
+          <img onclick="sortTable(0)" src="{{url_for('static', filename='arrow_up.png')}}" class="arrow">
+          <img onclick="sortTable(0, true)" src="{{url_for('static', filename='arrow_down.png')}}" class="arrow">
+        </th>
+  			<th>{{text['Description']}}  
+          <img onclick="sortTable(1)" src="{{url_for('static', filename='arrow_up.png')}}" class="arrow">
+          <img onclick="sortTable(1, true)" src="{{url_for('static', filename='arrow_down.png')}}" class="arrow">
+        </th>
   			{% for col in col_strings %}
-  				<th> {{ col }} <button onclick="sortTable( {{loop.index+1}} )">^</button> <button onclick="sortTable({{loop.index+1}}, true)">v</button></th>
+  				<th> {{ col }} 
+            <img onclick="sortTable({loop.index+1}})" src="{{url_for('static', filename='arrow_up.png')}}" class="arrow">
+            <img onclick="sortTable({loop.index+1}}, true)" src="{{url_for('static', filename='arrow_down.png')}}" class="arrow">
+          </th>
   			{% endfor %}
   	        
   	    </tr>

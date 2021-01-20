@@ -2,26 +2,30 @@
 
 {% block body %}
  <!-- TODO make these button pretty arrows -->
-  <a href="/daily_tasks/{{datestrings[0]}}">Day</a>
-  <a href="/weekly_tasks/{{datestrings[0]}}">Week</a>
-  <a href="/monthly_tasks/{{datestrings[0]}}">Month</a>
+ <span style="font-size: 18px; color: grey;">{{text['Tasks by']}}: </span>
+  <a class="pretty-button" href="/daily_tasks/{{datestring}}">{{text['Day']}}</a>
+  <a class="pretty-button" href="/weekly_tasks/{{datestring}}">{{text['Week']}}</a>
+  <a class="pretty-button" href="/monthly_tasks/{{datestring}}">{{text['Month']}}</a>
   <br>
-	<h1 id="day_header" style="display: inline">Tasks for Monday, {{datestrings[0]}} - Sunday {{datestrings[6]}}</h1>
   <br>
-  <a id="prev_button"><- </a>
-  <a id="next_button"> -></a>
+  <h1 id="day_header" style="display: inline">{{text['Tasks for Monday']}}, {{datestrings[0]}} - {{text['Sunday']}} {{datestrings[6]}}</h1>
+  <br>
+  <a  id="prev_button"><img  src="{{url_for('static', filename='arrow_left.png')}}" class="arrow"></a>
+  <a  id="next_button"><img  src="{{url_for('static', filename='arrow_right.png')}}" class="arrow"></a>
+  <br>
   <br>
 
-  <h3>Choose a task type:</h3>
+
+  <h3>{{text['Choose a task type']}}:</h3>
   <select id="task_type" name="task_type" onchange="filterByTaskType()">
-    <option value="all">all</option>
+    <option value="all">{{text['all']}}</option>
     {% for task_type in task_types %}
       <option value="{{task_type.task_type}}">{{task_type.task_type}}</option>
     {% endfor %}
   </select>
 
   {% for tasks in tasks_by_day %}
-    <h3><a href="/daily_tasks/{{datestrings[loop.index]}}">{{weekdays[loop.index]}}, {{datestrings[loop.index]}}</a></h3>
+    <h3><a href="/daily_tasks/{{datestrings[loop.index]}}">{{WEEKDAYS[loop.index]}}, {{datestrings[loop.index]}}</a></h3>
     <div id="table-container-{{weekdays[loop.index]}}">
   	  <table id="hidden-task-table-{{weekdays[loop.index]}}" style="display: none; width:100%;">
     		

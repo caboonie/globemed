@@ -1,22 +1,24 @@
 {% extends "layout.html" %}
 
 {% block body %}
- <!-- TODO make these button pretty arrows -->
-  
-  <a href="/daily_tasks/{{datestring}}">Day</a>
-  <a href="/weekly_tasks/{{datestring}}">Week</a>
-  <a href="/monthly_tasks/{{datestring}}">Month</a>
-  <br>
-	<h1 id="month_header" style="display: inline">Tasks for {{month}}</h1>
-  <br>
-  <a id="prev_button"><- </a>
-  <a id="next_button"> -></a>
-  <br>
-  
 
-  <h3>Choose a task type:</h3>
+<!-- TODO make these button pretty arrows -->
+  <span style="font-size: 18px; color: grey;">{{text['Tasks by']}}: </span>
+  <a class="pretty-button" href="/daily_tasks/{{datestring}}">{{text['Day']}}</a>
+  <a class="pretty-button" href="/weekly_tasks/{{datestring}}">{{text['Week']}}</a>
+  <a class="pretty-button" href="/monthly_tasks/{{datestring}}">{{text['Month']}}</a>
+  <br>
+  <br>
+  <h1 id="month_header" style="display: inline">{{text['Tasks for']}} {{month}}</h1>
+  <br>
+  <a  id="prev_button"><img  src="{{url_for('static', filename='arrow_left.png')}}" class="arrow"></a>
+  <a  id="next_button"><img  src="{{url_for('static', filename='arrow_right.png')}}" class="arrow"></a>
+  <br>
+  <br>
+
+  <h3>{{text['Choose a task type']}}:</h3>
   <select id="task_type" name="task_type" onchange="filterByTaskType()">
-    <option value="all">all</option>
+    <option value="all">{{text['all']}}</option>
     {% for task_type in task_types %}
       <option value="{{task_type.task_type}}"> {{task_type.task_type}} </option>
     {% endfor %}
@@ -25,7 +27,7 @@
 
   <table id="hidden-task-table" style="display: block; width:100%;">
   <tr>
-    {% for header in weekdays %}
+    {% for header in WEEKDAYS %}
       <td>{{header}}</td>
     {% endfor %}
   </tr>
@@ -91,19 +93,19 @@
 </table>
 <div style="border: solid: 1px black; width:75%; min-height: 100px; position: relative; margin-top: 5px">
   <div style="position:absolute; top: 0px; margin: 0px;">
-    <h3 style="margin: 0px;">Legend</h3>
+    <h3 style="margin: 0px;">{{text['Legend']}}</h3>
   </div>
   <table  style="position:absolute; top: 30px; border: 1px solid #CCC;
     border-collapse: collapse;" class="legend">
     <tr>
       <td>
-        <span>Reminder: </span><span style="width:10px; height: 10px; background-color: blue; display: inline-block; border: solid 1px black; border-radius: 5px"></span>
+        <span>{{text['Reminder']}}: </span><span style="width:10px; height: 10px; background-color: blue; display: inline-block; border: solid 1px black; border-radius: 5px"></span>
       </td>
       <td>
-        <span>Due Date: </span><span style="width:10px; height: 10px; background-color: blue; display: inline-block; border: solid 2px black;"></span>
+        <span>{{text['Due Date']}}: </span><span style="width:10px; height: 10px; background-color: blue; display: inline-block; border: solid 2px black;"></span>
       </td>
       <td>
-        <span>Completed: </span><span style="width:10px; height: 10px; background-color: grey; display: inline-block; "></span>
+        <span>{{text['Completed']}}: </span><span style="width:10px; height: 10px; background-color: grey; display: inline-block; "></span>
       </td>
     </tr>
     <tr>

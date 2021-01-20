@@ -118,7 +118,227 @@ button {
 .tooltip2:hover .tooltiptext {
   visibility: visible;
 }
+
+.search-button {
+  background-color: transparent;
+  border-radius: 5px;
+  color: #9d9d9d;
+  border-color: transparent;
+}
+
+.search-button:hover {
+  background-color: gray;
+  color: black;
+}
+
+.navbar {
+  font-size: 20px;
+}
+
+@media (min-width: 768px) {
+  .navbar-nav>li>a {
+    padding-top: 19px;
+    padding-bottom: 19px;
+  }
+}
+
+/* Style the top navigation bar */
+.navbar-container {
+
+  }
+.navbar {
+  display: flex;
+  /*justify-content: flex-start;*/
+  background-color: #333;
+  position: relative;
+  width: 100%;
+  top:0;
+  margin-top: 0;
+  z-index: 9999;
+  padding-right: 0px;
+  margin-bottom: 0px;
+}
+
+/* Style the navigation bar links */
+.navbar a {
+  color: white;
+  padding: 14px 20px;
+  text-decoration: none;
+  text-align: center;
+  position: relative;
+}
+
+.navlink {
+  text-align: center;
+}
+
+/* Change color on hover */
+.navbar a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.navlink {
+  display: block;
+}
+
+#navbutton{
+  display: none;
+}
+
+.navbar .hiddenlink {
+  padding: 14px 14px;
+  display: block;
+  color: white;
+  text-decoration: none;
+  text-align: center;
+}
+
+.navright {
+  /*justify-content: flex-end;*/
+}
+
+.collapsedlink {
+  display: none;
+}
+
+.row{
+  margin: 0px;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+
+}
+
+.right-col {
+  float: left;
+  width: calc(100% - 244px);
+}
+
+/* Responsive layout - when the screen is less than 700px wide, make the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 1267px) {
+
+  .navbar {   
+    flex-direction: column;
+    position: relative;
+    
+  }
+  .navlink{
+    display: none;
+  }
+  #navbutton{
+    display: block;
+  }
+
+
+  .navbar .hiddenlink {
+    display: none;
+  }
+  .brand_logo {
+    display: none;
+  }
+
+  .right-col {
+    float: none;
+    width: 100%;
+  }
+
+
+}
+
+/* Calendar styles */
+
+.pretty-button {
+  border: solid 2px grey;
+  color: grey;
+  background-color: transparent;
+  border-radius: 3px;
+  padding: 5px;
+  box-sizing: border-box;
+  margin:3px;
+}
+
+.pretty-button:hover {
+  margin: 0px;
+  border: solid 5px lightgray;
+}
+
+.arrow {
+  cursor: pointer;
+  width: 15px;
+  height: 15px;
+  margin: 3px;
+  box-sizing: border-box;
+}
+
+.arrow:hover {
+  width: 21px;
+  height: 21px;
+  margin: 0px;
+}
+
+
 </style>
+
+<script type="text/javascript">
+  function expandNav(button) {
+    $('.navlink').to
+    if($('.navlink').css('display')=='none'){
+      $('.navlink').css('display','block')
+    } else {
+      $('.navlink').css('display','none')
+    }
+    // $(button).css('display','block')
+  }
+
+
+    function changeLanguage() {
+      $.ajax({
+        type : 'POST',
+        url : "{{url_for('changeLanguage')}}",
+        contentType: 'application/json;charset=UTF-8',
+        data : {'data':'changeLanguage'},
+        success: function(data) {
+          location.reload();
+        }
+      });
+      console.log("CLIcCKED!!!")
+    }
+
+
+
+</script>
+
+{% set text = {'Task Overview':'Resumen de una tarea', 'Task Type':'Tipo de la Tarea', 'Due Date':'Fecha de vencimiento', 'Description':'Descripción: ', 'Completed':'Terminada', 'Fields':'Campos:', 'Reminders': 'Recordatorios', 'Complete Task': 'Completa la tarea', 'Un-Complete Task': 'In-completa la tarea', 'Update Task':'Actualizar la tarea', 'Required Fields':'Campos necesarios', 'Optional Fields': 'Campos opcionales', 'Current Reminders':'Recordatorios actuales', 'Remove':'Eliminar', 'Add Reminder':'Agregar Recordatorio', 'Copy Task':'Copiar la tarea', 
+'Tasks':'Tareas', 'Add Task':'Agregar Tarea', 'Inventory':'Inventario', 'Dashboard':'Tablero', 'Log In':'Iniciar Sesión', 'Log Out':'Cerrar Sesión', 'Hello':'Hola', 'Español':'English', 'footer':'footer spanish',
+
+'Day':'Día', 'Week':'Semana', 'Month':'Mes', 'Tasks by':'Tareas por', 'Choose a task type':'Elige un tipo de tarea', 'Tasks for':'Tareas por', 'Legend':'Leyenda', 'Reminder':'Recordatorio',
+
+'Tasks for Monday':'Tareas de Lunes', 'Sunday':'Domingo',
+
+'Search Options':'Opciones de buscar', 'Min Date':'Fecha minimal', 'Max Date':'Fecha maximal', 'Keyword':'Palabra clave', 'Search':'Buscar', 'Search Results':'Resultados de buscar', 'all':'todo', 'Name':'Nombre', 'Field':'Campo',
+
+'Admin Dashboard':'Panel de administración', 'Create a New User':'Crear una nueva usuaria', 'Is an admin':'Es un administrador', 'Add New User':'Agregar usuaria nueva', 'Existing Task Types': 'Tipos de tarea existentes', 'Required':'Necesario', 'Optional':'Opcional', 'Create a New Task Type':'Crear un nuevo tipo de tarea', 'Add Text Field':'Agregar campo de texto', 'Add Option Field':'Agregar campo de opciones', 'Add Option':'Agregar opción', 'Add Task Type':'Agregar Tipo de Tarea', 'Select color':'Eligir un color', 'Username':'Nombre de usuario', 'Password':'Contraseña', 'Text Field':'Campo de Texto',
+
+'Add Inventory Item':'Agregar Artículo de Inventario', 'Inventory Overview':'Resumen de Inventario', 'Units':'Unidades', 'Type':'Tipo', 'Add Item':'Agregar Artículo', 'Adjust Amount':'Ajustar Cantidad', 'Existing Units':'Unidades existentes', 'Add Unit': 'Agregar Unidad', 'Existing Types':'Tipos Existentes', 'Add Type': 'Agregar Tipo', 'Item Name':'Nombre del Artículo', 'Amount':'Cantidad', 'Amount to change by':'Cantidad a cambiar por', 'Abbreviation (optional)':'Abreviatura (opcional)', 'Type Name': 'Nombre del Tipo', 'Danger Amount':'Cantidad de peligro', 'Buy More Amount':'Cantidad de comprar más', 'Search for item':'Buscar por un artículo', 'Danger':'Peligro', 'Buy More':'Comprar más'
+} %}
+
+{% set WEEKDAYS = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabados", "Domingo"] %}
+{% set UNITS = ["día", "semana", "mes"] %}
+
+
+{% if session['language'] == 'English' %}
+  {% for key in text %}
+    {% set text=text.__setitem__(key, key) %}
+  {% endfor %}
+  {% set WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] %}
+  {% set UNITS = ["day", "week", "month"] %}
+{% endif %}
+
+
 
 </head>
 
@@ -126,77 +346,75 @@ button {
   <!-- <script src="//code.jquery.com/jquery-latest.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> -->
 
-  <nav class="navbar navbar-inverse">
-    <!-- <div class="container"> -->
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
+  <!-- Navigation Bar -->
+<div class="navbar">
+  <div class="row" style="width:100%">
+    <div class="brand_logo" style=" float: left; ">
+      
+
+      <a  href="/" style="height: 70px; padding: 2px; display: block;">
+        <img alt="Brand Logo" src="{{url_for('static', filename='brand_logo.png')}}" style="max-height: 100%; border: 1px solid black; border-radius: 5px;">
+      </a>
+    </div>
+
+    <div class="right-col" style="" >
+      <div class="navbar" style="width: 100%">
+        <a id="navbutton" onclick="expandNav(this)">=</a>
+        <a class="hiddenlink" href = "{{url_for('daily_tasks_')}}">{{text['Tasks']}}</a>
+        <a class="hiddenlink" href = "{{url_for('add_task')}}">{{text['Add Task']}}</a>
+        <a class="hiddenlink" href = "{{url_for('inventory')}}">{{text['Inventory']}}</a>
+        {%if session['is_admin']%}
+            <a class="hiddenlink" href = "{{url_for('dashboard')}}">{{text['Dashboard']}}</a>
+          {% endif %}
+        <form class="hiddenlink" action="{{ url_for('search') }}" method = 'post' style="padding: 0px;">
+          <input id="input-search" style="width: 150px; color: black;" class="search-bar" type="text" name="search" placeholder="...">
 
 
-        <a class="navbar-brand" href="/" style="height: 70px; padding: 2px;">
-          <img alt="Brand Logo" src="{{url_for('static', filename='brand_logo.png')}}" style="max-height: 100%; border: 1px solid black; border-radius: 5px;">
-        </a>
-        <ul class="nav navbar-nav">
-          <li><a href = "{{url_for('daily_tasks_')}}">Tasks</a></li>
-          <li><a href = "{{url_for('add_task')}}">Add Task</a></li>
-          <li><a href = "{{url_for('inventory')}}">Inventory</a></li>
-          <li>
-            <form action="{{ url_for('search') }}" method = 'post'>
-              <input id="input-search" class="search-bar" type="text" name="search" placeholder="...">
+          <button class="search-button" type="submit" id="search" style="margin-left: -40px;">
+            <img src="{{url_for('static', filename = 'search_icon.png') }}" height="20px" width="20px" >
+          </button>
+        </form>
+        
+          {% if 'id' in session %}
+            <span style="margin-left: auto;" class="hiddenlink" >{{text['Hello']}}, <strong>{{session['username']}}</strong></span>
+          
+            <a class="hiddenlink" href = "{{url_for('logout')}}">{{text['Log Out']}}</a>
+          {% else %}
+            <a style="" class="hiddenlink" href = "{{url_for('login')}}">{{text['Log In']}}</a>
+          {% endif %}
+        <a id="changeLanguage" onclick="changeLanguage()" class="hiddenlink">{{text['Español']}}</a>
 
-              <button class="btn btn-success" type="submit" id="search"> Buscar </button>
-            </form>
-          </li>
-        </ul>
-      </div>
 
-      <div class="collapse navbar-collapse" id="navbar-collapse-1">
-        <ul class="nav navbar-nav navbar-left flags">
-          <!-- <div class="flags"> -->
-          <!-- </div> -->
-        </ul>
+  
 
-        <div class="navbar-right">
-   
+        <a class="navlink collapsedlink" href = "{{url_for('daily_tasks_')}}">{{text['Tasks']}}</a>
+        <a class="navlink collapsedlink" href = "{{url_for('add_task')}}">{{text['Add Task']}}</a>
+        <a class="navlink collapsedlink" href = "{{url_for('inventory')}}">{{text['Inventory']}}</a>
+        {%if session['is_admin']%}
+            <a class="navlink collapsedlink" href = "{{url_for('dashboard')}}">{{text['Dashboard']}}</a>
+          {% endif %}
+        <form class="navlink collapsedlink" action="{{ url_for('search') }}" method = 'post'>
+          <input id="input-search" style="width: 150px; color: black;" class="search-bar" type="text" name="search" placeholder="...">
+
+
+          <button class="search-button" type="submit" id="search" style="margin-left: -40px;">
+            <img src="{{url_for('static', filename = 'search_icon.png') }}" height="20px" width="20px" >
+          </button>
+        </form>
         {% if 'id' in session %}
-          <div class="navbar-text" id="userbox">
-            
-           
-              You are currently signed in as <strong>{{session['username']}}</strong>
-              </div>
-              <ul class="nav navbar-nav">
-                <li><a href = "{{url_for('logout')}}">Log Out</a></li>
-              </ul>
-
-
-            {%if session['is_admin']%}
-                <ul class="nav navbar-nav">
-                  <li><a href = "{{url_for('dashboard')}}">Dashboard</a></li>
-                </ul>
-            {%endif%}
-
-            
-        {%else%}
-           
-
-        {%endif%}
-        </div>
-
+            <a class="navlink collapsedlink" href = "{{url_for('logout')}}">{{text['Log Out']}}</a>
+          {% else %}
+            <a class="navlink collapsedlink" href = "{{url_for('login')}}">{{text['Log In']}}</a>
+          {% endif %}
+        <a id="changeLanguage" onclick="changeLanguage()" class="navlink collapsedlink">{{text['Español']}}</a>
       </div>
-
-    <!-- </div> -->
-  </nav>
-
-  <!-- Title Container -->
-  <div class="logo">
-    <!-- <img src = "{{url_for('static', filename='meet_logo_1.png')}}" alt="Meet_Logoredv" style="max-height: 50px;"> -->
-   
+    </div>
   </div>
-  <!-- End Title Container -->
+
+</div>
+
+
+  
 
  
     <!--Flash Messaging --> 
@@ -225,7 +443,7 @@ button {
 
 
   <!-- Body -->
-  <div style="margin-left: 30px; margin-right: 30px; padding-bottom: 5.5rem;    /* Footer height */">
+  <div style="position:relative; margin-top:20px; margin-left: 30px; margin-right: 30px; padding-bottom: 5.5rem;    /* Footer height */">
   {% block body %}
 
   {% endblock %}
@@ -234,7 +452,7 @@ button {
   
   <div>
     <div class="footer">
-      <span> Footer Here </span>
+      <span> {{text['footer']}} </span>
   <!-- 
       <a href="http://meet.mit.edu"><img class="footer" src="{{url_for('static', filename='meet_logo_21.png')}}" height=40px></a>
       <img class="footer" src="{{url_for('static', filename='Y3Accelerator1.png')}}" height=100px>

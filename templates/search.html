@@ -1,16 +1,16 @@
 {% extends "layout.html" %}
 
 {% block body %}
-  <h1>search Options</h1>
+  <h1>{{text['Search Options']}}</h1>
     <form action="{{ url_for('advanced_search_page') }}" method = 'post'>
 
-          <input type="text" id="keywords"  name="keywords" placeholder="Keyword(s)..." value="{{keywords}}">
-          <input  type="text" name="names" placeholder="Name(s)..." value="{{names}}">
-          <input  type="text" name="fields" placeholder="Field(s)..." value="{{fields}}">
-          <label for="start_date">Min Date: </label><input id="start_date" type="date" name="start_date">
-          <label for="end_date">Max Date: </label><input id="end_date" type="date" name="end_date">
+          <input type="text" id="keywords"  name="keywords" placeholder="{{text['Keyword']}}(s)..." value="{{keywords}}">
+          <input  type="text" name="names" placeholder="{{text['Name']}}(s)..." value="{{names}}">
+          <input  type="text" name="fields" placeholder="{{text['Field']}}(s)..." value="{{fields}}">
+          <label for="start_date">{{text['Min Date']}}: </label><input id="start_date" type="date" name="start_date">
+          <label for="end_date">{{text['Max Date']}}: </label><input id="end_date" type="date" name="end_date">
           <br>
-          <label for="task_type">Task Type: </label>
+          <label for="task_type">{{text['Task Type']}}: </label>
           <select name="task_type" id="task_type_search">
           <option value=""></option>
           {% for task_type in task_types %}
@@ -19,14 +19,14 @@
         </select>
         <br>
 
-          <button class="btn btn-success" type="submit" > Search </button>
+          <button class="btn btn-success" type="submit" > {{text['Search']}} </button>
        </form>
 
-	<h1>Search Results</h1>
+	<h1>{{text['Search Results']}}</h1>
 
-  <h3>Filter by task type:</h3>
+  <h3>{{text['Choose a task type']}}:</h3>
   <select id="task_type" name="task_type" onchange="filterByTaskType()">
-    <option value="all">all</option>
+    <option value="all">{{text['all']}}</option>
     {% for task_type in task_types %}
       <option value="{{task_type.task_type}}">{{task_type.task_type}}</option>
     {% endfor %}

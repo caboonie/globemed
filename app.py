@@ -9,6 +9,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = "a;lfkdsjaflksdj"
 
 UNITS = ["day", "week", "month"]
+WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
 
 def check_login_wrapper(func):
     @wraps(func)
@@ -16,9 +18,35 @@ def check_login_wrapper(func):
         print("here")
         if "username" not in login_session:
             return redirect(url_for('login'))
+        if "language" not in login_session:
+            login_session["language"] = "Spanish"
         return func(*args, **kwargs)
     return inner
 
+@app.route('/changeLanguage', methods = ['POST'])
+def changeLanguage():
+    print("Changing language yoooo!")
+    if "language" not in login_session or login_session['language'] == 'English':
+        login_session['language'] = 'Spanish'
+        UNITS = ["dia", "semana", "mes"]
+        WEEKDAYS = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabados", "Domingo"]
+    else:
+        login_session['language'] = 'English'
+        UNITS = ["day", "week", "month"]
+        WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    return 'changed language'
+
+
+@app.route('/changeLanguage', methods = ['GET'])
+def changeLanguage2(return_url):
+    if "language" not in login_session:
+        login_session["language"] = "Spanish"
+
+    if login_session['language'] == 'English':
+        login_session['language'] = 'Spanish'
+    else:
+        login_session['language'] = 'English'
+    return redirect(url_for(home))
 
 @app.route('/')
 @check_login_wrapper
@@ -29,7 +57,10 @@ def home():
 @app.route("/login", methods = ['GET', 'POST'])
 def login():
     if 'id' in login_session:
-        flash("Already logged in.")
+        if login_session["language"] == "English":
+            flash("Already logged in.")
+        else:
+            flash("Ya iniciado sesión.")
         return redirect(url_for("home"))
     if request.method == 'GET':
         return render_template('login.html')
@@ -37,7 +68,10 @@ def login():
         username = request.form['username']
         password = request.form['password']
         if username is None or password is None:
-            flash("Missing Values")
+            if login_session["language"] == "English":
+                flash("Missing Values.")
+            else:
+                flash("Valores faltantes.")
             return redirect(url_for('login'))
         if verify_password(username, password):
             user = get_user(username)
@@ -47,13 +81,19 @@ def login():
             return redirect(url_for('home'))
             
         else:
-            flash("Incorrect email/password combination")
+            if login_session["language"] == "English":
+                flash("Incorrect username/password combination.")
+            else:
+                flash("Combinación incorrecta de nombre de usuario / contraseña.")
             return redirect(url_for('login'))
 
 @app.route("/logout")
 def logout():
     login_session.clear()
-    flash("Successfully Logged Out")
+    if login_session["language"] == "English":
+        flash("Successfully Logged Out.")
+    else:
+        flash("Desconectado correctamente.")
     return redirect(url_for('home'))
 
 @app.route('/dashboard')
@@ -65,7 +105,10 @@ def dashboard():
 @check_login_wrapper
 def add_user():
     if not login_session['is_admin']:
-        flash("Missing Values")
+        if login_session["language"] == "English":
+            flash("Missing Values.")
+        else:
+            flash("Valores faltantes.")
         return redirect(url_for('login'))
     print("form", request.form)
 
@@ -73,7 +116,10 @@ def add_user():
     password = request.form['password']
     is_admin = "is_admin" in request.form
     if username is None or password is None:
-        flash("Missing Required Values")
+        if login_session["language"] == "English":
+            flash("Missing Values.")
+        else:
+            flash("Valores faltantes.")
         return redirect(url_for('dashboard'))
 
     create_user(username, password, is_admin)
@@ -88,7 +134,11 @@ def add_task_type():
         flash("Cannot make a task without a name.")
         return redirect(url_for('dashboard'))
     elif get_task_type_by_name(task_type) != None:
-        flash("Task by the name " + task_type + " already exists.")
+
+        if login_session["language"] == "English":
+            flash("Task by the name " + task_type + " already exists.")
+        else:
+            flash("La tarea con el nombre "+ task_type +" ya existe.")
         return redirect(url_for('dashboard'))
     required_fields = []
     optional_fields = []
@@ -122,7 +172,11 @@ def add_task_type():
             reminders.append(Reminder(int(request.form[field]), request.form["unit_{}".format(count)]))
             
     create_task_type(task_type, required_fields, optional_fields, reminders, request.form["task_color"])
-    flash("Task Type: " + task_type + " created!")
+
+    if login_session["language"] == "English":
+        flash("Task Type: " + task_type + " created!")
+    else:
+        flash("Tipo de tarea: "+ task_type +" creado!")
 
     return redirect(url_for('dashboard'))
 
@@ -155,9 +209,15 @@ def weekly_tasks(date):
     monday =  date_datetime - timedelta(days = date_datetime.weekday())
     monday_datestr = monday.strftime("%Y-%m-%d")
     return render_template("weekly_tasks.html", tasks_by_day=get_tasks_week(monday_datestr), col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), 
-        datestrings = [(monday+timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)],
-        weekdays=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
+        datestrings = [(monday+timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)], datestring=monday.strftime("%Y-%m-%d"),
+        weekdays=WEEKDAYS)
 
+
+@app.route('/weekly_tasks')
+@check_login_wrapper
+def weekly_tasks_(date):
+    date = datetime.now().strftime("%Y-%m-%d")
+    return weekly_tasks(date)
 
 @app.route('/monthly_tasks/<date>')
 @check_login_wrapper
@@ -172,11 +232,16 @@ def monthly_tasks(date):
     for day_notifications in tasks_by_day:
         for notification in day_notifications:
             legend[notification.task.task_type] = notification.task.color
-
+    print("rendering month ", WEEKDAYS)
     return render_template("monthly_tasks.html", tasks_by_day=tasks_by_day, col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), 
         month =  datetime.strptime(date, "%Y-%m-%d").strftime("%B, %Y"), datestring=date, headers_by_day=headers_by_day,
-        weekdays=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], legend=legend)
+        weekdays=WEEKDAYS, legend=legend)
 
+@app.route('/monthly_tasks')
+@check_login_wrapper
+def monthly_tasks_(date):
+    date = datetime.now().strftime("%Y-%m-%d")
+    return monthly_tasks(date)
 
 @app.route('/task/<int:task_id>')
 @check_login_wrapper
@@ -230,7 +295,7 @@ def add_task():
 
 @app.route('/update_task/<int:task_id>',  methods = ['POST'])
 @check_login_wrapper
-def update_task():
+def update_task(task_id):
     task_type_name = request.form['task_type']
     task_type = get_task_type_by_name(task_type_name)
     due_date_str = request.form["due_date"]
@@ -250,6 +315,11 @@ def update_task():
     update_task(task_id, due_date, description, task_type_name, fields, reminders, reminder_datestrings)
     flash("Task added successfully!")
     return render_template("task.html", task=get_task(task_id))
+
+@app.route('/copy_task/<int:task_id>',  methods = ['GET', 'POST'])
+@check_login_wrapper
+def copy_task(task_id):
+    return render_template("copy_task.html", task=get_task(task_id), task_type=get_task_type_by_name(get_task(task_id).task_type))
 
 
 @app.route('/search',  methods = ['GET', 'POST'])
@@ -310,7 +380,13 @@ def advanced_search_page():
 @check_login_wrapper
 def inventory():
     print("inventory", get_inventory())
-    return render_template("inventory.html", inventory=get_inventory(), units = get_units())
+    inventory_by_types = {}
+    for inv_item in get_inventory():
+        if inv_item.inventory_type.name not in inventory_by_types:
+            inventory_by_types[inv_item.inventory_type.name] = []
+        inventory_by_types[inv_item.inventory_type.name].append(inv_item)
+    print("invent by types", inventory_by_types)
+    return render_template("inventory.html", inventory=get_inventory(), inventory_by_types=inventory_by_types, units = get_units(), inv_types = get_inventory_types())
 
 @app.route('/add_unit', methods = ['POST'])  
 @check_login_wrapper
@@ -322,11 +398,18 @@ def add_unit_page():
     add_unit(request.form["unit_name"], abbreviation)
     return redirect(url_for('inventory'))
 
+@app.route('/add_inventory_type', methods = ['POST'])  
+@check_login_wrapper
+def add_inventory_type_page():
+    add_inventory_type(request.form["type_name"], abbreviation)
+    return redirect(url_for('inventory'))
+
 @app.route('/add_item', methods = ['POST'])  
 @check_login_wrapper
 def add_item_page():
     unit = get_unit_by_name(request.form["unit_name"])
-    add_inventory_item(request.form["item_name"], float(request.form["amount"]), unit)
+    inv_type = get_inventory_type_by_name(request.form["type_name"])
+    add_inventory_item(request.form["item_name"], float(request.form["amount"]), unit, inv_type, float(request.form["danger_amount"]), float(request.form["buy_more_amount"]))
     return redirect(url_for('inventory'))
 
 @app.route('/set_item', methods = ['POST'])  
@@ -338,7 +421,12 @@ def set_item_amount_page():
 @app.route('/change_item', methods = ['POST'])  
 @check_login_wrapper
 def change_item_amount_page():
-    update_inventory_item(request.form["item_name"], float(request.form["amount"]))
+    succeed, message_english, message_spanish = update_inventory_item(request.form["item_name"], float(request.form["amount"]))
+    if not succeed:
+        if login_session['language'] == "English":
+            flash(message_english)
+        else:
+            flash(message_spanish)
     return redirect(url_for('inventory'))
 
 

@@ -7,14 +7,14 @@
 
   <form action="{{ url_for('login') }}" method = 'post'>
     <div class="form-group">
-      <input id="input-username1" class="username form-control" type="text" name="username" placeholder="Username">
+      <input id="input-username1" class="username form-control" type="text" name="username" placeholder="{{text['Username']}}">
     </div>
 
     <div class="form-group">
-      <input id="input-password1" class="password form-control" type="password" name="password" placeholder="Password">
+      <input id="input-password1" class="password form-control" type="password" name="password" placeholder="{{text['Password']}}">
     </div>
 
-    <button class="btn btn-success" type="submit" id="submit-login"> Login </button>
+    <button class="btn btn-success" type="submit" id="submit-login"> {{text['Log In']}} </button>
   </form>
 
 

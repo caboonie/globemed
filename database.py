@@ -224,6 +224,23 @@ if get_unit_by_name("grams") == None:
     add_unit("grams", "g")
 
 
+def add_inventory_type(name):
+    inv_type = InventoryType(name=name)
+    session.add(inv_type)
+
+def get_inventory_type(type_id):
+    return session.query(InventoryType).filter_by(id=type_id).first()
+
+def get_inventory_type_by_name(type_name):
+    return session.query(InventoryType).filter_by(name=type_name).first()
+
+def get_inventory_types():
+    return session.query(InventoryType).all()
+
+if get_inventory_type_by_name("Pharmacy") == None:
+    add_inventory_type("Pharmacy")
+
+
 def get_inventory_item(id):
     return session.query(InventoryItem).filter_by(id=id).first()
 
@@ -233,19 +250,22 @@ def get_inventory_item_by_name(name):
 def get_inventory():
     return session.query(InventoryItem).all()
 
-def add_inventory_item(name, init_amount, unit_object):
+def add_inventory_item(name, init_amount, unit_object, inv_type, danger_amount, buy_more_amount):
     # print("check", get_inventory_item_by_name(name), get_inventory_item_by_name(name)==None, type(get_inventory_item_by_name(name)))
     if get_inventory_item_by_name(name) != None:
         return False, "Already added"
-    item = InventoryItem(name=name, amount=init_amount, unit=unit_object)
+    item = InventoryItem(name=name, amount=init_amount, unit=unit_object, inventory_type=inv_type, danger_amount=danger_amount, buy_more_amount=buy_more_amount)
     session.add(item)
     session.commit()
     return True, "Successfully added"
 
 def update_inventory_item(item_name, amount_diff):
     item = get_inventory_item_by_name(item_name)
-    item.amount = item.amount + amount_diff
+    if item == None:
+        return False, "Invalid Item Name","Nombre de artículo no válido"
+    item.amount = max(0, item.amount + amount_diff)
     session.commit()
+    return True, "no msg", "no msg"
 
 def set_inventory_item(item_name, amount):
     item = get_inventory_item_by_name(item_name)
@@ -254,7 +274,7 @@ def set_inventory_item(item_name, amount):
 
 if get_inventory_item_by_name("Tylenol") == None:
     print("adding Tylenol")
-    print(add_inventory_item("Tylenol", 100.5, get_unit_by_name("grams")))
+    print(add_inventory_item("Tylenol", 100.5, get_unit_by_name("grams"), get_inventory_type_by_name("Pharmacy"), 100, 150))
 print("Tylenol there?", get_inventory_item_by_name("Tylenol"))
 
 
