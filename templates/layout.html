@@ -59,8 +59,8 @@ button {
 }
 
 .calendar-box {
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 120px;
 }
 
 .pointer {
@@ -192,6 +192,7 @@ button {
   color: white;
   text-decoration: none;
   text-align: center;
+  box-sizing: border-box;
 }
 
 .navright {
@@ -218,7 +219,16 @@ button {
   width: calc(100% - 244px);
 }
 
-/* Responsive layout - when the screen is less than 700px wide, make the two columns stack on top of each other instead of next to each other */
+#fade_bar {
+  position: fixed;width: 100%;top: 71px;height: 15px; z-index: 10; 
+  background: linear-gradient(
+    to bottom,
+    white, 
+    transparent
+  );
+}
+
+/* Responsive layout - when the screen is less than 1267px wide, make the two columns stack on top of each other instead of next to each other */
 @media screen and (max-width: 1267px) {
 
   .navbar {   
@@ -246,6 +256,10 @@ button {
     width: 100%;
   }
 
+  #fade_bar {
+    top:60px;
+  }
+
 
 }
 
@@ -264,22 +278,75 @@ button {
 .pretty-button:hover {
   margin: 0px;
   border: solid 5px lightgray;
+  cursor: pointer;
+}
+
+.no-border-button {
+  color: grey;
+  background-color: transparent;
+  border-radius: 3px;
+  padding: 5px;
+  box-sizing: border-box;
+  border: solid 2px transparent;
+}
+
+.no-border-button:hover {
+  margin: 0px;
+  border: solid 2px lightgray;
+  cursor: pointer;
 }
 
 .arrow {
   cursor: pointer;
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
   margin: 3px;
   box-sizing: border-box;
 }
 
 .arrow:hover {
-  width: 21px;
-  height: 21px;
+  width: 25px;
+  height: 25px;
   margin: 0px;
 }
 
+
+/* Styles for autocomplete fields used for inventory items */
+/*the container must be positioned relative:*/
+.autocomplete {
+  position: relative;
+  display: inline-block;
+}
+
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  /*position the autocomplete items to be the same width as the container:*/
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff; 
+  border-bottom: 1px solid #d4d4d4; 
+}
+
+/*when hovering an item:*/
+.autocomplete-items div:hover {
+  background-color: #e9e9e9; 
+}
+
+/*when navigating through the items using the arrow keys:*/
+.autocomplete-active {
+  background-color: DodgerBlue !important; 
+  color: #ffffff; 
+}
 
 </style>
 
@@ -308,12 +375,119 @@ button {
       console.log("CLIcCKED!!!")
     }
 
+// Autocomplete functionality 
+
+function autocomplete(inp, arr) {
+  /*the autocomplete function takes two arguments,
+  the text field element and an array of possible autocompleted values:*/
+  var currentFocus;
+  /*execute a function when someone writes in the text field:*/
+  inp.addEventListener("input", function(e) {
+      var a, b, i, val = this.value;
+      /*close any already open lists of autocompleted values*/
+      closeAllLists();
+      if (!val) { return false;}
+      currentFocus = -1;
+      /*create a DIV element that will contain the items (values):*/
+      a = document.createElement("DIV");
+      a.setAttribute("id", this.id + "autocomplete-list");
+      a.setAttribute("class", "autocomplete-items");
+      /*append the DIV element as a child of the autocomplete container:*/
+      this.parentNode.appendChild(a);
+      /*for each item in the array...*/
+      for (i = 0; i < arr.length; i++) {
+        /*check if the item starts with the same letters as the text field value:*/
+        if (arr[i].toUpperCase().includes(val.toUpperCase())) {
+          /*create a DIV element for each matching element:*/
+          b = document.createElement("DIV");
+          /*make the matching letters bold:*/
+          index = arr[i].toUpperCase().search(val.toUpperCase());
+          b.innerHTML = arr[i].substr(0, index)
+          b.innerHTML += "<strong>" + arr[i].substr(index, val.length) + "</strong>";
+          b.innerHTML += arr[i].substr(val.length+index);
+          /*insert a input field that will hold the current array item's value:*/
+          b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+          /*execute a function when someone clicks on the item value (DIV element):*/
+          b.addEventListener("click", function(e) {
+              /*insert the value for the autocomplete text field:*/
+              inp.value = this.getElementsByTagName("input")[0].value;
+              /*close the list of autocompleted values,
+              (or any other open lists of autocompleted values:*/
+              closeAllLists();
+          });
+          a.appendChild(b);
+        }
+      }
+  });
+  /*execute a function presses a key on the keyboard:*/
+  inp.addEventListener("keydown", function(e) {
+      console.log("here!!")
+      var x = document.getElementById(this.id + "autocomplete-list");
+      if (x) x = x.getElementsByTagName("div");
+      if (e.keyCode == 40) {
+        /*If the arrow DOWN key is pressed,
+        increase the currentFocus variable:*/
+        currentFocus++;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 38) { //up
+        /*If the arrow UP key is pressed,
+        decrease the currentFocus variable:*/
+        currentFocus--;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 13) {
+        /*If the ENTER key is pressed, prevent the form from being submitted,*/
+        e.preventDefault();
+        if (currentFocus > -1) {
+          /*and simulate a click on the "active" item:*/
+          if (x) x[currentFocus].click();
+        }
+      }
+  });
+  function addActive(x) {
+    /*a function to classify an item as "active":*/
+    if (!x) return false;
+    /*start by removing the "active" class on all items:*/
+    removeActive(x);
+    if (currentFocus >= x.length) currentFocus = 0;
+    if (currentFocus < 0) currentFocus = (x.length - 1);
+    /*add class "autocomplete-active":*/
+    x[currentFocus].classList.add("autocomplete-active");
+  }
+  function removeActive(x) {
+    /*a function to remove the "active" class from all autocomplete items:*/
+    for (var i = 0; i < x.length; i++) {
+      x[i].classList.remove("autocomplete-active");
+    }
+  }
+  function closeAllLists(elmnt) {
+    /*close all autocomplete lists in the document,
+    except the one passed as an argument:*/
+    var x = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < x.length; i++) {
+      if (elmnt != x[i] && elmnt != inp) {
+        x[i].parentNode.removeChild(x[i]);
+      }
+    }
+  }
+  /*execute a function when someone clicks in the document:*/
+  document.addEventListener("click", function (e) {
+      closeAllLists(e.target);
+  });
+}
+
 
 
 </script>
 
-{% set text = {'Task Overview':'Resumen de una tarea', 'Task Type':'Tipo de la Tarea', 'Due Date':'Fecha de vencimiento', 'Description':'Descripción: ', 'Completed':'Terminada', 'Fields':'Campos:', 'Reminders': 'Recordatorios', 'Complete Task': 'Completa la tarea', 'Un-Complete Task': 'In-completa la tarea', 'Update Task':'Actualizar la tarea', 'Required Fields':'Campos necesarios', 'Optional Fields': 'Campos opcionales', 'Current Reminders':'Recordatorios actuales', 'Remove':'Eliminar', 'Add Reminder':'Agregar Recordatorio', 'Copy Task':'Copiar la tarea', 
-'Tasks':'Tareas', 'Add Task':'Agregar Tarea', 'Inventory':'Inventario', 'Dashboard':'Tablero', 'Log In':'Iniciar Sesión', 'Log Out':'Cerrar Sesión', 'Hello':'Hola', 'Español':'English', 'footer':'footer spanish',
+{% set text = {'Task Overview':'Resumen de una tarea', 
+'Task Type':'Tipo de la Tarea', 'Due Date':'Fecha de vencimiento', 'Description':'Descripción', 'Completed':'Terminada', 'Fields':'Campos', 'Reminders': 'Recordatorios', 'Complete Task': 'Completa la tarea', 'Un-Complete Task': 'In-completa la tarea', 'Update Task':'Actualizar la tarea', 'Required Fields':'Campos necesarios', 'Optional Fields': 'Campos opcionales', 'Current Reminders':'Recordatorios actuales', 'Remove':'Eliminar', 'Add Reminder':'Agregar Recordatorio', 'Add Another Reminder':'Agregar Otro Recordatorio', 'Copy Task':'Copiar la tarea', 'Enter a reminder date':'Entra una Fecha para un Recordatorio',
+'Tasks':'Tareas', 'Add Task':'Agregar Tarea', 'Inventory':'Inventario', 'Dashboard':'Tablero', 'Log In':'Iniciar Sesión', 'Log Out':'Cerrar Sesión', 'Hello':'Hola', 'Español':'English', 'footer':'footer spanish', 'TaskGenerator by MIT Globemed - 2021':'TaskGenerator de MIT Globemed - 2021', 'Monday':'Lunes',
+
+'Allow Other':'Permitir "otra"','Please type your username and password to log in':'Escriba su nombre de usuario y contraseña para iniciar sesión', 'Enter a reminder for (number) (unit) before the due date': 'Ingrese un recordatorio para (número) (unidad) antes de la fecha de vencimiento','Field':'Campo','Option':'Opción','Reminder':'Recordatorio',
+
+'Items of Potential Use':'Articulos de uso potencial', 'Enter an Item Name':'Entrar un nombre de un articulo', 'Select any items that were used and indicate the amount you used':'Seleccione los artículos que se utilizaron e indique la cantidad que usaste', 'Use a negative number if adding more of the item':'Use un número negativo si agrega más del elemento', 'Example':'Ejemplo', 'Filter by task type':'Filtrar por tipo de tarea',
 
 'Day':'Día', 'Week':'Semana', 'Month':'Mes', 'Tasks by':'Tareas por', 'Choose a task type':'Elige un tipo de tarea', 'Tasks for':'Tareas por', 'Legend':'Leyenda', 'Reminder':'Recordatorio',
 
@@ -323,7 +497,8 @@ button {
 
 'Admin Dashboard':'Panel de administración', 'Create a New User':'Crear una nueva usuaria', 'Is an admin':'Es un administrador', 'Add New User':'Agregar usuaria nueva', 'Existing Task Types': 'Tipos de tarea existentes', 'Required':'Necesario', 'Optional':'Opcional', 'Create a New Task Type':'Crear un nuevo tipo de tarea', 'Add Text Field':'Agregar campo de texto', 'Add Option Field':'Agregar campo de opciones', 'Add Option':'Agregar opción', 'Add Task Type':'Agregar Tipo de Tarea', 'Select color':'Eligir un color', 'Username':'Nombre de usuario', 'Password':'Contraseña', 'Text Field':'Campo de Texto',
 
-'Add Inventory Item':'Agregar Artículo de Inventario', 'Inventory Overview':'Resumen de Inventario', 'Units':'Unidades', 'Type':'Tipo', 'Add Item':'Agregar Artículo', 'Adjust Amount':'Ajustar Cantidad', 'Existing Units':'Unidades existentes', 'Add Unit': 'Agregar Unidad', 'Existing Types':'Tipos Existentes', 'Add Type': 'Agregar Tipo', 'Item Name':'Nombre del Artículo', 'Amount':'Cantidad', 'Amount to change by':'Cantidad a cambiar por', 'Abbreviation (optional)':'Abreviatura (opcional)', 'Type Name': 'Nombre del Tipo', 'Danger Amount':'Cantidad de peligro', 'Buy More Amount':'Cantidad de comprar más', 'Search for item':'Buscar por un artículo', 'Danger':'Peligro', 'Buy More':'Comprar más'
+'Add Inventory Item':'Agregar Artículo de Inventario', 'Inventory Overview':'Resumen de Inventario', 'Units':'Unidades', 'Type':'Tipo', 'Add Item':'Agregar Artículo', 'Add Another Item':'Agregar Otro Artículo', 'Adjust Amount':'Ajustar Cantidad', 'Existing Units':'Unidades existentes', 'Add Unit': 'Agregar Unidad', 'Existing Types':'Tipos Existentes', 'Add Type': 'Agregar Tipo', 'Item Name':'Nombre del Artículo', 'Amount':'Cantidad', 'Amount to change by':'Cantidad a cambiar por', 'Abbreviation (optional)':'Abreviatura (opcional)', 'Type Name': 'Nombre del Tipo', 'Danger Amount':'Cantidad de peligro', 'Buy More Amount':'Cantidad de comprar más', 'Search for item':'Buscar por un artículo', 'Danger':'Peligro', 'Buy More':'Comprar más', 'Unit':'Unidad',
+'Disable Pictorial':'Desactivar pictórica', 'Enable Pictoral':'Activar pictórica', 'Sort by Name':'Ordenar por nombre', 'Sort by Quantity':'Ordenar por cantidad'
 } %}
 
 {% set WEEKDAYS = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabados", "Domingo"] %}
@@ -342,12 +517,12 @@ button {
 
 </head>
 
-<body style="position: relative;  min-height: 100vh;">
+<body style="position: relative;  min-height: 89vh;">
   <!-- <script src="//code.jquery.com/jquery-latest.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> -->
 
   <!-- Navigation Bar -->
-<div class="navbar">
+<div class="navbar" style="position: fixed; margin-bottom: 100px;" >
   <div class="row" style="width:100%">
     <div class="brand_logo" style=" float: left; ">
       
@@ -360,13 +535,13 @@ button {
     <div class="right-col" style="" >
       <div class="navbar" style="width: 100%">
         <a id="navbutton" onclick="expandNav(this)">=</a>
-        <a class="hiddenlink" href = "{{url_for('daily_tasks_')}}">{{text['Tasks']}}</a>
-        <a class="hiddenlink" href = "{{url_for('add_task')}}">{{text['Add Task']}}</a>
-        <a class="hiddenlink" href = "{{url_for('inventory')}}">{{text['Inventory']}}</a>
+        <a id="task_nav" class="hiddenlink" href = "{{url_for('daily_tasks_')}}">{{text['Tasks']}}</a>
+        <a id="add_nav" class="hiddenlink" href = "{{url_for('add_task')}}">{{text['Add Task']}}</a>
+        <a id="inventory_nav" class="hiddenlink" href = "{{url_for('inventory')}}">{{text['Inventory']}}</a>
         {%if session['is_admin']%}
-            <a class="hiddenlink" href = "{{url_for('dashboard')}}">{{text['Dashboard']}}</a>
+            <a id="dashboard_nav" class="hiddenlink" href = "{{url_for('dashboard')}}">{{text['Dashboard']}}</a>
           {% endif %}
-        <form class="hiddenlink" action="{{ url_for('search') }}" method = 'post' style="padding: 0px;">
+        <form class="hiddenlink" action="{{ url_for('search') }}" method = 'post' style="padding: 0px; margin-left: auto;">
           <input id="input-search" style="width: 150px; color: black;" class="search-bar" type="text" name="search" placeholder="...">
 
 
@@ -376,11 +551,11 @@ button {
         </form>
         
           {% if 'id' in session %}
-            <span style="margin-left: auto;" class="hiddenlink" >{{text['Hello']}}, <strong>{{session['username']}}</strong></span>
+            <span class="hiddenlink" >{{text['Hello']}}, <strong>{{session['username']}}</strong></span>
           
             <a class="hiddenlink" href = "{{url_for('logout')}}">{{text['Log Out']}}</a>
           {% else %}
-            <a style="" class="hiddenlink" href = "{{url_for('login')}}">{{text['Log In']}}</a>
+            <a  class="hiddenlink" href = "{{url_for('login')}}">{{text['Log In']}}</a>
           {% endif %}
         <a id="changeLanguage" onclick="changeLanguage()" class="hiddenlink">{{text['Español']}}</a>
 
@@ -410,8 +585,13 @@ button {
       </div>
     </div>
   </div>
-
 </div>
+
+<!-- Opacity Fade Away Bar -->
+<div id="fade_bar" >
+</div>
+
+
 
 
   
@@ -420,8 +600,11 @@ button {
     <!--Flash Messaging --> 
     {% with messages = get_flashed_messages() %}
       <!-- {% if messages %} -->
-      <div class="alert alert-info alert-dismissible message" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="text-align: right"><span aria-hidden="true">&times;</span></button>
+
+      <div class="alert alert-info alert-dismissible message" role="alert" style="opacity: .95; position: fixed;z-index: 9999;margin: auto; top: 110px;left: 50%;-webkit-transform: translate(-50%,-50%);-ms-transform: translate(-50%,-50%);transform: translate(-50%,-50%);">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="text-align: right" ><span 
+          onclick="$('.alert-dismissible').fadeTo(300, 0).slideUp(300, function(){
+          });" aria-hidden="true">&times;</span></button>
 
           {% for message in messages %}
             <strong> {{ message }} </strong><br>
@@ -431,19 +614,24 @@ button {
       </div>
       <!-- {% endif %} -->
 
-<!--       <script>
-        $(".alert-dismissible").fadeTo(2000, 500).slideUp(500, function(){
-            $(".alert-dismissible").alert('close');
-        });
-      </script> -->
+       <script>
+        $(".alert-dismissible").fadeIn(500, 1)
+        function fade() {
+          $(".alert-dismissible").fadeTo(500, 0).slideUp(500, function(){
+          });
+        }
+        setTimeout(fade, 2000)
+
+      </script>
     {% endwith %}  		
     <!-- End FLash Messaging --> 
 
   <!-- </div>  -->
 
 
+
   <!-- Body -->
-  <div style="position:relative; margin-top:20px; margin-left: 30px; margin-right: 30px; padding-bottom: 5.5rem;    /* Footer height */">
+  <div style="position:relative; margin-top:90px; margin-left: 30px; margin-right: 30px; padding-bottom: 5.5rem;    /* Footer height */">
   {% block body %}
 
   {% endblock %}
@@ -452,7 +640,7 @@ button {
   
   <div>
     <div class="footer">
-      <span> {{text['footer']}} </span>
+      <span> {{text['TaskGenerator by MIT Globemed - 2021']}} </span>
   <!-- 
       <a href="http://meet.mit.edu"><img class="footer" src="{{url_for('static', filename='meet_logo_21.png')}}" height=40px></a>
       <img class="footer" src="{{url_for('static', filename='Y3Accelerator1.png')}}" height=100px>

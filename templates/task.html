@@ -2,7 +2,14 @@
 
 {% block body %}
 
+<style type="text/css">
 
+#task_nav {
+  border: solid grey 2px;
+  border-radius: 2px;
+}
+
+</style>
 
 	<h1>{{text['Task Overview']}}</h1>
 
@@ -10,7 +17,7 @@
 	<h2> {{text['Task Type']}}: {{ task.task_type }} </h2>
 	<h3> {{text['Due Date']}}:  {{ task.due_datestring }} </h3>
 	<p> {{text['Description']}}: {{ task.description }} </p>
-	<p> {{text['Completed']}}:  {{task.completed}} </p>
+	
 	<h3>{{text['Fields']}}: </h3>
 	{% for field in task.fields %}
 		<p> {{field}}: {{task.fields[field]}} </p>
@@ -18,40 +25,84 @@
 
 	{% endfor %}
 
-	<h3>{{text['Reminders']}}</h3>
-	{% for reminder in task.reminder_datestrings %}
-		<p> {{reminder}} </p>
+	{% if (task.reminder_datestrings | length) > 0 %}
+		<h3>{{text['Reminders']}}</h3>
+		{% for reminder in task.reminder_datestrings %}
+			<p> {{reminder}} </p>
 
-	{% endfor %}
+		{% endfor %}
+	{% endif %}
 
+	<br>
+	<h3 style="display: inline;"> {{text['Completed']}}: </h3>
 	{% if task.completed %}
-		<form action="/uncomplete_task/{{task.id}}"  method = 'post'>
-		  <div class="form-group" >
-		  	 <button class="btn btn-success" type="submit" >{{text['Un-Complete Task']}}</button>
-		  </div>
-		</form>
+		 <img width="20px" height="20px" src="{{url_for('static', filename='checkmark.png')}}">
 	{% else %}
-		<form action="/complete_task/{{task.id}}"  method = 'post'>
+		<img width="20px" height="20px" src="{{url_for('static', filename='red_x.png')}}">
+		<p> {{text['Select any items that were used and indicate the amount you used']}}: </p>
+		<p> {{text['Use a negative number if adding more of the item']}}: </p>
+		<form action="/complete_task/{{task.id}}"  method = 'post' autocomplete="off">
+			{% for item in items_of_use %}
+				<label for="item_{{item.id}}">{{ item.name }}: </label>
+				<input type="number" name="item_{{item.id}}" id="item_{{item.id}}">
+				<span> Current amount: {{item.amount}} {{item.unit.name}}(s) </span>
+			{% endfor %}
+			<div id="complete_items">
+
+			</div>
+
+			<br>
+			<!-- <div id="add+item_auto_box" class="autocomplete" style="width:300px;">
+			    <input id="extra_item" class="username form-control" type="text" name="item_number">
+		   </div> -->
+			<button type="button" onclick="addUseItem()" style="margin: 10px;">{{text['Add Another Item']}} in progress</button>
+      <br>
+
+		
 		  <div class="form-group" >
 		  	 <button class="btn btn-success" type="submit" >{{text['Complete Task']}}</button>
 		  </div>
 		</form>
-	 {% endif %}
+		
+	{% endif %}
+
+
+
+	 <!-- templates for cloning -->
+    <div style="display: none;">
+	 	<img class="no-border-button" id="remove_template" width="25px" height="25px" src="{{url_for('static', filename='red_x.png')}}">
+	 	<div id="reminder_box"></div>
+        <input id="reminder_date_template" class="username form-control" type="date" name="reminder_number">
+
+        <div id="item_box"></div>
+	    <div id="item_auto_box_template" class="autocomplete" style="width:300px;"></div>
+	    <input id="item_template" class="username form-control" type="text" name="item_number" >
+
+		<input type="number" name="item_number" id="item_number_template" placeholder="amount">
+	</div>
+
+	<h3>{{text['Copy Task']}}</h3>
+	<a href="/copy_task/{{task.id}}"><button class="btn btn-success" type="button" id="copy_task"> {{text['Copy Task']}} </button></a>
 
 
 	<h3>{{text['Update Task']}}</h3>
-	<form action="/update_task/{{task.id}}"  method = 'post'>
+	<form action="/update_task/{{task.id}}"  method = 'post' autocomplete="off">
 	  <div class="form-group" >
+	  	<input style="display: none" type="text"  name="task_type" value="{{task.task_type}}">
 	  	
-	  	<div>{{text['Required Fields']}}</div>
-	  	<label for="due_date">{{text['Due Date']}}: </label><input class="required"  type="date" id="due_date_=" name="due_date" onchange="calculateAllDates()">
+	  	<h4>{{text['Required Fields']}}</h4>
+	  	<label for="due_date">{{text['Due Date']}}: </label><input required class="required" value="{{task.due_datestring}}" type="date" id="due_date_=" name="due_date" onchange="calculateAllDates()">
 	  	<!-- TODO - for some reason, description isn't required??? -->
-	  	<label for="description">{{text['Description']}}: </label><textarea class="required" name="description" rows="4" cols="50">{{task.description}}</textarea>
+	  	<br>
+	  	<label for="description">{{text['Description']}}: </label>
+	  	<br>
+	  	<textarea required class="required" name="description" rows="4" cols="50">{{task.description}}</textarea>
+	  	<br>
 	  	{% for field in task_type.required_fields %}
 	  		{% if field is mapping %}
 	  			{% for key in field %}
-	  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:</label>
-	  				<select class="required_{{task_type.task_type}}" id="{{task_type.task_type}}_{{key}}" name="{{key}}" value={{task.fields[field]}}>
+	  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:  </label>
+	  				<select required class="required_{{task_type.task_type}}" id="{{task_type.task_type}}_{{key}}" name="{{key}}" value={{task.fields[field]}}>
 					  	<option value=""></option>
 					  	{% for option in field[key] %}
 						    <option value="{{option}}">{{option}}</option>
@@ -59,16 +110,16 @@
 					  </select>
 	  			{% endfor %}
 	  		{% else %}
-		  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input class="required_{{task_type.task_type}}" type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}" value={{task.fields[field]}}>
+		  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:  </label><input required class="required_{{task_type.task_type}}" type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}" value={{task.fields[field]}}>
 		  	{% endif %}
 	  	{% endfor %}
 
 	  	{% if (task_type.optional_fields | length) > 0%}
-		  	<div>{{text['Optional Fields']}}</div>
+		  	<h4>{{text['Optional Fields']}}</h4>
 		  	{% for field in task_type.optional_fields %}
 			  	{% if field is mapping %}
 		  			{% for key in field %}
-		  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:</label>
+		  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:  </label>
 		  				<select id="{{task_type.task_type}}_{{key}}" name="{{key}}" value={{task.fields[field]}}>
 						  	<option value=""></option>
 						  	{% for option in field[key] %}
@@ -77,25 +128,41 @@
 						  </select>
 		  			{% endfor %}
 		  		{% else %}
-		  			<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}" value={{task.fields[field]}}>
+		  			<label for="{{task_type.task_type}}_{{field}}">{{field}}:  </label><input type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}" value={{task.fields[field]}}>
 		  		{% endif %}
 		  	{% endfor %}
 		{% endif %}
 
-		<div id="task_reminders_{{task_type.task_type}}" class="form_group">
-		  	<div>{{text['Current Reminders']}}</div>
-		  	{% for reminder in task_type.reminders %}
-		  		<div id="field_{{loop.index}}">
-			  		<p>{{reminder.amount}} {{reminder.unit}}(s): </p>
-			  		<input name="reminder_{{loop.index}}" type="date" id="reminder_{{loop.index}}" class="reminder" data-amount="{{reminder.amount}}" data-unit="{{reminder.unit}}" data-user-changed="false" onchange="userChange(this)">
-			  		<button id="remove_template" type="button" style="margin: 10px" onclick="removeField({{loop.index}})">{{text['Remove']}}</button>
+		<div id="task_reminders" class="form_group">
+		  	<h4>{{text['Current Reminders']}}</h4>
+		  	{% for reminder in task.reminder_datestrings %}
+		  		<div id="field_{{loop.index}}"> 
+			  		<input name="reminder_{{loop.index}}" value="{{reminder}}" type="date" id="reminder_{{loop.index}}" class="reminder" data-amount="{{reminder.amount}}" data-unit="{{reminder.unit}}" data-user-changed="false" onchange="userChange(this)">
+			  		<img class="no-border-button" id="remove_{{loop.index}}" width="25px" height="25px" src="{{url_for('static', filename='red_x.png')}}"
+			  			onclick="removeField({{loop.index}})">
 			  	</div>
 		  	{% endfor %}
 
 	  	
 	    </div>
 
-	  	<button type="button" onclick="addReminder('{{task_type.task_type}}')" style="margin: 10px;">{{text['Add Reminder']}}</button>
+	    
+
+	  	<button type="button" onclick="addReminder()" style="margin: 10px;">{{text['Add Reminder']}}</button>
+
+	  	<div id="task_items" class="form_group">
+	        <div><h4>{{text['Items of Potential Use']}}:</h4></div>
+	        {% for item in items_of_use %}
+		        <div id="field_{{loop.index}}">
+		        	<input id="item_template" class="username form-control" type="text" name="item_{{loop.index}}" value="{{item.name}}" style="display: inline;">
+
+				    <img class="no-border-button" id="remove_template" width="25px" height="25px" src="{{url_for('static', filename='red_x.png')}}" onclick="removeField({{loop.index}})">
+			    </div>	 
+			    {% endfor %}     
+	      </div>
+
+      <button type="button" onclick="addItem('task_items')" style="margin: 10px;">{{text['Add Another Item']}}</button>
+      <br>
 
 	  	 <button class="btn btn-success" type="submit" id="submit_new_user"> {{text['Update Task']}} </button>
 
@@ -103,7 +170,153 @@
 	  </div>
 	 </form>
 
-	 <a href="/copy_task/{{task.id}}"><button class="btn btn-success" type="button" id="copy_task"> {{text['Copy Task']}} </button></a>
+	 
 
+
+<script type="text/javascript">
+
+	function updateLabel(count) {
+		console.log("trying to update", count)
+		var label = $("#item_label_"+count)
+		var name_input = $("#added_item_"+count)
+		item_name = name_input.val()
+		console.log("item name", name_input, "blergh", item_name, (item_name in name_to_item))
+		if (item_name in name_to_item) {
+			label.html(name_to_item[item_name][0] + " " + name_to_item[item_name][1] + "(s) left")
+		}
+
+	}
+
+  function	addUseItem() {
+  	var box = jQuery("#item_box").clone();
+    box.css("display","block");
+    box.attr("id", "field_"+count)
+
+    var label = $("<p></p>").text("{{text['Enter an Item Name']}}: ");
+    box.append(label)
+
+    var inner_box = jQuery("#item_auto_box_template").clone();
+    inner_box.css("display","inline");
+    inner_box.attr("id", "item_auto_"+count)
+    box.append(inner_box);
+
+    var item_input = jQuery("#item_template").clone();
+    item_input.css("display","inline");
+    item_input.attr("name", "added_item_"+count)
+    item_input.attr("id", "added_item_"+count)
+    item_input.attr("onkeydown", "updateLabel("+count+")")
+    /*initiate the autocomplete function on the item input element, and pass along the countries array as possible autocomplete values:*/
+    autocomplete(item_input[ 0 ], countries);
+    inner_box.append(item_input);
+
+    var number_input = jQuery("#item_number_template").clone();
+    number_input.attr("name", "added_amount_"+count)
+    number_input.attr("id", "added_amount_"+count)
+    inner_box.append(number_input)
+
+    var item_label = $("<span></span>").text("");
+    item_label.attr("id", "item_label_"+count)
+    inner_box.append(item_label)
+
+
+    var remove = jQuery("#remove_template").clone();
+    remove.css("display","inline");
+    remove.attr("id", "remove_"+count)
+    remove.attr("onclick", "removeField("+count+")")
+    box.append(remove)
+
+    jQuery("#complete_items").append(box);
+    
+
+    count -= 1;
+  }
+
+
+
+  count = -1
+
+  function addReminder() {
+    var box = jQuery("#reminder_box").clone();
+    box.css("display","block");
+    box.attr("id", "field_"+count)
+
+    var label = $("<p></p>").text("{{text['Enter a reminder date']}}: ");
+    box.append(label)
+    var number = jQuery("#reminder_date_template").clone();
+    number.css("display","inline");
+    number.attr("name", "reminder_date_"+count)
+    box.append(number);
+
+    var remove = jQuery("#remove_template").clone();
+    remove.css("display","inline");
+    remove.attr("id", "remove_"+count)
+    remove.attr("onclick", "removeField("+count+")")
+    box.append(remove)
+
+    jQuery("#task_reminders").append(box);
+    
+
+    count -= 1;
+  }
+
+  function addItem(id) {
+    var box = jQuery("#item_box").clone();
+    box.css("display","block");
+    box.attr("id", "field_"+count)
+
+    var label = $("<p></p>").text("{{text['Enter an Item Name']}}: ");
+    box.append(label)
+
+    var inner_box = jQuery("#item_auto_box_template").clone();
+    inner_box.css("display","inline");
+    inner_box.attr("id", "item_auto_"+count)
+    box.append(inner_box);
+
+    var item_input = jQuery("#item_template").clone();
+    item_input.css("display","inline");
+    item_input.attr("name", "item_"+count)
+    item_input.attr("id", "item_"+count)
+    /*initiate the autocomplete function on the item input element, and pass along the countries array as possible autocomplete values:*/
+    autocomplete(item_input[ 0 ], countries);
+    inner_box.append(item_input);
+
+    var remove = jQuery("#remove_template").clone();
+    remove.css("display","inline");
+    remove.attr("id", "remove_"+count)
+    remove.attr("onclick", "removeField("+count+")")
+    box.append(remove)
+
+    jQuery("#"+id).append(box);
+    
+
+    count -= 1;
+  }
+
+  function removeField(id) {
+    jQuery("#field_"+id).css("display", "none");
+    jQuery("#field_"+id).val(""); // clear out the value so that this field is not saved to database upon submission
+
+    try {
+      jQuery("#reminder_unit_"+id).css("display", "none");
+    } catch {
+
+    }
+    jQuery("#remove_"+id).css("display", "none");
+  }
+
+
+
+/*An array containing all the country names in the world:*/
+var countries = [{% for name in name_to_item %}
+           "{{name}}",
+          {% endfor %}
+          ];
+var name_to_item = { {% for name in name_to_item %}
+           "{{name}}":[{{name_to_item[name].amount}}, "{{name_to_item[name].unit.name}}"],
+          {% endfor %}
+          };
+console.log("countries", countries)
+
+</script>
 
 {%endblock%}

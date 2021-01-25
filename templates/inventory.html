@@ -2,6 +2,12 @@
 
 {% block body %}
 
+<style type="text/css">
+#inventory_nav {
+  border: solid grey 2px;
+  border-radius: 2px;
+}
+</style>
 
 
 <script type="text/javascript">
@@ -38,7 +44,69 @@
 		}
 	}
 
+	function sortAlpha(){
+		function compareAlpha(x,y) {
+			return (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase())
+		}
+		sortList(compareAlpha);
+	}
 
+	function sortQuant(){
+		function compareQuant(x,y) {
+			
+			x_danger_percent = x.dataset.amount/x.dataset.danger;
+			y_danger_percent = y.dataset.amount/y.dataset.danger;
+			if (x_danger_percent < 1 || y_danger_percent < 1) {
+				return x_danger_percent > y_danger_percent
+			}
+			return x.dataset.amount/x.dataset.buymore > y.dataset.amount/y.dataset.buymore
+		}
+		sortList(compareQuant);
+	}
+
+
+	function sortList(compareFunction) {
+	  var lists = document.getElementsByClassName("inventory_sub_list")
+	  // console.log("lists", lists)
+	  for (var j=0; j < lists.length; j++) {
+	  	switching = true;
+	  	list = lists[j];
+		  /*Make a loop that will continue until
+		  no switching has been done:*/
+		  while (switching) {
+		  	//start by saying: no switching is done:
+		    switching = false;
+		    // console.log('here list',list)
+		    items = list.getElementsByClassName("inventory_item");
+		    // console.log('here childNodes:',items)
+		    /*Loop through all table rows (except the
+		    first, which contains table headers):*/
+		    for (i = 0; i < (items.length - 1); i++) {
+		    	// console.log("item ", items[i])
+		    	  shouldSwitch = false;
+			      /*Get the two elements you want to compare,
+			      one from current row and one from the next:*/
+			      x = items[i]
+			      y = items[i + 1]
+			      
+			      //check if the two rows should switch place:
+			      if (compareFunction(x,y)) {
+			      	// console.log("comparing", x.innerHTML.toLowerCase(), y.innerHTML.toLowerCase())
+			        //if so, mark as a switch and break the loop:
+			        shouldSwitch = true;
+			        break;
+			      }
+		    }
+		    if (shouldSwitch) {
+		      /*If a switch has been marked, make the switch
+		      and mark that a switch has been done:*/
+		      items[i].parentNode.insertBefore(items[i + 1], items[i]);
+		      switching = true;
+		    }
+		  }
+	  }
+	 }
+	  
 
 </script>
 
@@ -46,78 +114,27 @@
 * {
   box-sizing: border-box;
 }
-
-
-/*the container must be positioned relative:*/
-.autocomplete {
-  position: relative;
-  display: inline-block;
-}
-
-/*input {
-  border: 1px solid transparent;
-  background-color: #f1f1f1;
-  padding: 10px;
-  font-size: 16px;
-}
-
-input[type=text] {
-  background-color: #f1f1f1;
-  width: 100%;
-}
-
-input[type=submit] {
-  background-color: DodgerBlue;
-  color: #fff;
-  cursor: pointer;
-}*/
-
-.autocomplete-items {
-  position: absolute;
-  border: 1px solid #d4d4d4;
-  border-bottom: none;
-  border-top: none;
-  z-index: 99;
-  /*position the autocomplete items to be the same width as the container:*/
-  top: 100%;
-  left: 0;
-  right: 0;
-}
-
-.autocomplete-items div {
-  padding: 10px;
-  cursor: pointer;
-  background-color: #fff; 
-  border-bottom: 1px solid #d4d4d4; 
-}
-
-/*when hovering an item:*/
-.autocomplete-items div:hover {
-  background-color: #e9e9e9; 
-}
-
-/*when navigating through the items using the arrow keys:*/
-.autocomplete-active {
-  background-color: DodgerBlue !important; 
-  color: #ffffff; 
-}
 </style>
 
 
 	<div class="row">
 		<div style="width: 70%; float: left; ">
 			<h1>{{text['Inventory Overview']}}</h1>
-			<button type="button" id="swapButton" onclick="swapPictoral()">Disable Pictorial</button>
+			<button type="button" id="swapButton" onclick="swapPictoral()">{{text['Disable Pictorial']}}</button>
 			<input onkeyup ="filterInventory(this)" id="item_filter" type="" name="" placeholder="{{text['Search for item']}}...">
+			<button type="button" id="sortAlpha" onclick="sortAlpha()">{{text['Sort by Name']}}</button>
+			<button type="button" id="sortQuant" onclick="sortQuant()">{{text['Sort by Quantity']}}</button>
 
 
 			<ul id="inventory_list" style="display: none">
 				{% for inv_type in inventory_by_types %}
-					<li> {{inv_type.name}}
-						<ul>
+					<li> {{inv_type}}
+						<ul class="inventory_sub_list">
 					
 					{% for item in inventory_by_types[inv_type] %}
-						<li class="inventory_item">{{item.name}}: {{item.amount}} {{item.unit.name}}
+						<li class="inventory_item" data-name="{{item.name}}" data-amount="{{item.amount}}" data-danger="{{item.danger_amount}}",
+						data-buysmore="{{item.buy_more_amount}}">
+							{{item.name}}: {{item.amount}} {{item.unit.name}}
 
 							{% if item.amount < item.danger_amount %}
 								<span style="color:red;">({{text['Danger']}} <{{item.danger_amount}})</span>
@@ -136,28 +153,63 @@ input[type=submit] {
 			</ul>
 
 			<ul id="inventory_pictoral">
+				<!-- template of pictoral -->
+				<li> {{text['Example']}}: 
+					<div class="inventory_item" >
+						<div style="height: 20px; width: 200px; position: relative; border: solid black 1px;">
+							<div style="position: absolute; left:0px; width: 20%; height: 19px; border-right: solid black 1px; background-color: red; opacity: .5"> </div>
+							<div style="position: absolute; left:10%; top:20px;">{{text['Danger']}}</div>
+							<div style="position: absolute; left:20%; width: 30%; height: 19px; border-right: solid black 1px; background-color: orange; opacity: .5"> </div>
+							<div style="position: absolute; left:45%; top:20px;">{{text['Buy More']}}</div>
+							<div style="position: absolute; left:50%; width: 50%; height: 19px;  background-color: green; opacity: .5"> </div>
+						</div>
+					</div>
+				</li>
+				<br>
+				<br>
 				{% for inv_type in inventory_by_types %}
 					<li> {{inv_type}}
-						<ul>
+						<ul class="inventory_sub_list">
+
 					
 					{% for item in inventory_by_types[inv_type] %}
-						<li class="inventory_item">{{item.name}}: {{item.amount}} {{item.unit.name}}
-							<div style="height: 20px; width: 200px; position: relative; border: solid black 1px;">
-								<div style="position: absolute; left:{{item.danger_amount / (0.02 * item.buy_more_amount)}}%; width: 10px; height: 22px; border-left: solid black 1px;"> </div>
-								<div style="position: absolute; left:15%; top:20px;">{{text['Danger']}}<br>{{item.danger_amount}}</div>
-								<div style="position: absolute; left:50%; width: 10px; height: 22px; border-left: solid black 1px;"> </div>
-								<div style="position: absolute; left:50%; top:20px;">{{text['Buy More']}}<br>{{item.buy_more_amount}}</div>
+					<li class="inventory_item" data-name="{{item.name}}" data-amount="{{item.amount}}" data-danger="{{item.danger_amount}}",
+					data-buymore="{{item.buy_more_amount}}">
+					{% if item.amount < item.danger_amount %}
+						<span style="color: red">{{item.name}}:</span>
+					{% else %}
+						<span style="color: black">{{item.name}}:</span>
+					{% endif %}
+						{{item.amount}} {{item.unit.name}}
+							<div style="height: 25px; width: 200px; position: relative; border: solid black 1px;">
+								<div style="position: absolute; left:{{item.danger_amount / (0.02 * item.buy_more_amount)}}%; width: 10px; height: 27px; border-left: solid black 1px;"> </div>
+								<div style="position: absolute; left:calc(min( 15%,  {{item.danger_amount / (0.02 * item.buy_more_amount)}}%)); top:25px;">
+									{% if item.unit.abbreviation | length < 4 %}
+										{{item.danger_amount}} {{item.unit.abbreviation}}
+									{% else %}
+										{{item.danger_amount}} {{item.unit.abbreviation[:4]}}
+									{% endif %}
+									
+								</div>
+								<div style="position: absolute; left:50%; width: 10px; height: 27px; border-left: solid black 1px;"> </div>
+								<div style="position: absolute; left:50%; top:25px;">
+									{% if item.unit.abbreviation | length < 4 %}
+										{{item.buy_more_amount}} {{item.unit.abbreviation}}
+									{% else %}
+										{{item.buy_more_amount}} {{item.unit.abbreviation[:4]}}
+									{% endif %}
+								</div>
 							
 
 							<div style="
 							{% if item.amount < item.danger_amount %}
 								background-color: red;
 							{% elif item.amount < item.buy_more_amount %}
-								background-color: yellow;
+								background-color: orange;
 							{% else %}
 								background-color: green;
 							{% endif %}
-							position: absolute; left:0px; top:0px; width: {{item.amount / (0.02 * item.buy_more_amount)}}%; max-width:198px; height: 18px;  opacity: .5;"> </div>
+							position: absolute; left:0px; top:0px; width: {{item.amount / (0.02 * item.buy_more_amount)}}%; max-width:198px; height: 23px;  opacity: .5;"> </div>
 
 							</div>
 							<br><br>
@@ -178,8 +230,8 @@ input[type=submit] {
 
 			<h3>{{text['Add Inventory Item']}}</h3>
 			<form action="{{ url_for('add_item_page') }}" method = 'post'>
-		  	  <input required type="text"  name="item_name" placeholder="{{text['Item Name']}}...">
-		  	  <input required type="number" step="0.01" name="amount" placeholder="{{text['Amount']}}...">
+		  	  <input style="margin-bottom: 5px;" required type="text"  name="item_name" placeholder="{{text['Item Name']}}...">
+		  	  <input style="margin-bottom: 5px;" required type="number" step="0.01" name="amount" placeholder="{{text['Amount']}}...">
 		  	  <br>
 		  	  <label for="unit_name">{{text['Units']}}: </label>
 		  	  <select required name="unit_name" id="unit_name">
@@ -198,9 +250,9 @@ input[type=submit] {
 			  </select>
 			  <br>
 
-		  	  <label for="danger_amount">{{text['Danger Amount']}}: </label><input required type="number" step="0.01" name="danger_amount" id="danger_amount" placeholder="{{text['Danger Amount']}}...">
+		  	  <label style="margin-bottom: 0px;" for="danger_amount">{{text['Danger Amount']}}: </label><input style="margin-bottom: 5px;" required type="number" step="0.01" name="danger_amount" id="danger_amount" placeholder="75...">
 		  	  <br>
-		  	  <label for="buy_more_amount">{{text['Buy More Amount']}}: </label><input required type="number" step="0.01" name="buy_more_amount" id="buy_more_amount" placeholder="{{text['Buy More Amount']}}...">
+		  	  <label style="margin-bottom: 0px;" for="buy_more_amount">{{text['Buy More Amount']}}: </label><input style="margin-bottom: 5px;" required type="number" step="0.01" name="buy_more_amount" id="buy_more_amount" placeholder="125...">
 		  	  <br>
 
 		  	  <button class="btn btn-success" type="submit" > {{text['Add Item']}} </button>
@@ -213,7 +265,7 @@ input[type=submit] {
 			 <form autocomplete="off" action="{{ url_for('change_item_amount_page') }}" method = 'post'>
 			 	<label for="change_item_name">Item: </label>
 			 	<div class="autocomplete" style="width:300px;">
-				    <input id="myInput" type="text" name="item_name" placeholder="Tylenol...">
+				    <input style="margin-bottom: 5px;" id="myInput" type="text" name="item_name" placeholder="Tylenol...">
 				</div>
 
 		  	  <!-- <select required name="item_name" id="change_item_name">
@@ -248,6 +300,15 @@ input[type=submit] {
 			 <br> -->
 
 
+			
+
+			<h3>{{text['Add Unit']}}</h3>
+			<form action="{{ url_for('add_unit_page') }}" method = 'post'>
+		  	  <input style="margin-bottom: 5px;" required type="text"  name="unit_name" placeholder="{{text['Unit']}}...">
+		  	  <input  type="text"  name="abbreviation" placeholder="{{text['Abbreviation (optional)']}}">
+		  	  <button class="btn btn-success" type="submit" > {{text['Add Unit']}} </button>
+			</form>
+
 			 <h3>{{text['Existing Units']}}</h3>
 			<ul>
 			{% for unit in units %}
@@ -257,27 +318,22 @@ input[type=submit] {
 
 			<br>
 
-			<h3>{{text['Add Unit']}}</h3>
-			<form action="{{ url_for('add_unit_page') }}" method = 'post'>
-		  	  <input  required type="text"  name="unit_name" placeholder="Unit...">
-		  	  <input  type="text"  name="abbreviation" placeholder="{{text['Abbreviation (optional)']}}">
-		  	  <button class="btn btn-success" type="submit" > {{text['Add Unit']}} </button>
-			</form>
-
-			<h3>{{text['Existing Types']}}</h3>
-			<ul>
-			{% for type in inv_types %}
-				<li>{{type.name}})</li>
-			{% endfor %}
-			</ul>
-
-			<br>
+			
 
 			<h3>{{text['Add Type']}}</h3>
 			<form action="{{ url_for('add_inventory_type_page') }}" method = 'post'>
 		  	  <input  required type="text"  name="type_name" placeholder="{{text['Type Name']}}...">
 		  	  <button class="btn btn-success" type="submit" > {{text['Add Type']}} </button>
 			</form>
+
+			<h3>{{text['Existing Types']}}</h3>
+			<ul>
+			{% for type in inv_types %}
+				<li>{{type.name}}</li>
+			{% endfor %}
+			</ul>
+
+			<br>
 
 		</div>
 	</div>

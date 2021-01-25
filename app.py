@@ -15,8 +15,8 @@ WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", 
 def check_login_wrapper(func):
     @wraps(func)
     def inner(*args, **kwargs):
-        print("here")
         if "username" not in login_session:
+            flash("Please login to see that page." if login_session["language"] == "English" else "Inicie sesión para ver esa página")
             return redirect(url_for('login'))
         if "language" not in login_session:
             login_session["language"] = "Spanish"
@@ -89,12 +89,14 @@ def login():
 
 @app.route("/logout")
 def logout():
+    lang = login_session['language']
     login_session.clear()
+    login_session['language'] = lang
     if login_session["language"] == "English":
         flash("Successfully Logged Out.")
     else:
         flash("Desconectado correctamente.")
-    return redirect(url_for('home'))
+    return redirect(url_for('login'))
 
 @app.route('/dashboard')
 @check_login_wrapper
@@ -180,6 +182,12 @@ def add_task_type():
 
     return redirect(url_for('dashboard'))
 
+@app.route('/remove_task_type/<int:task_type_id>',  methods = ['POST'])
+@check_login_wrapper
+def remove_task_type_page(task_type_id):
+    remove_task_type(task_type_id)
+    return redirect(url_for('dashboard'))
+
 @app.route('/tasks')
 @check_login_wrapper
 def tasks():
@@ -234,7 +242,7 @@ def monthly_tasks(date):
             legend[notification.task.task_type] = notification.task.color
     print("rendering month ", WEEKDAYS)
     return render_template("monthly_tasks.html", tasks_by_day=tasks_by_day, col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), 
-        month =  datetime.strptime(date, "%Y-%m-%d").strftime("%B, %Y"), datestring=date, headers_by_day=headers_by_day,
+        month =  datetime.strptime(date, "%Y-%m-%d").strftime("%B, %Y"), today_datestring= datetime.now().strftime("%Y-%m-%d"), datestring=date, headers_by_day=headers_by_day,
         weekdays=WEEKDAYS, legend=legend)
 
 @app.route('/monthly_tasks')
@@ -249,25 +257,52 @@ def task(task_id):
     if get_task(task_id) == None:
         flash("Task with id {} does not exist".format(task_id))
         return redirect(url_for('tasks'))
-    return render_template("task.html", task=get_task(task_id), task_type=get_task_type_by_name(get_task(task_id).task_type), units=UNITS)
+    task=get_task(task_id)
+    print("name_to_item", {item.name:item for item in get_inventory()})
+    return render_template("task.html", task=task, items_of_use=[get_inventory_item(item_id) for item_id in task.items_of_use], task_type=get_task_type_by_name(task.task_type), 
+        units=UNITS,  name_to_item={item.name:item for item in get_inventory()})
 
 @app.route('/complete_task/<int:task_id>', methods = ['POST'])
 @check_login_wrapper
 def complete_task_page(task_id):
     complete_task(task_id)
-    return render_template("task.html", task=get_task(task_id))
+    for field in request.form:
+        if field[:4] == "item" and request.form[field] != "":
+            item_id = field.split("_")[-1]
+            item = get_inventory_item(item_id)
+            if item == "None":
+                flash("Invalid item")
+            amount = float(request.form[field])
+            update_inventory_item(item.name, -amount) 
+            flash("Removed "+str(amount)+" "+item.unit.name+" of "+item.name+". Now has "+str(get_inventory_item(item_id).amount))
+        if field[:10] == "added_item" and request.form[field] != "":
+            input_id = field.split("_")[-1]
+            item_name = request.form["added_item_"+input_id]
+
+            item = get_inventory_item_by_name(item_name)
+            if item == "None":
+                flash("Invalid item")
+            try:
+
+                amount = float(request.form["added_amount_"+input_id])
+                update_inventory_item(item.name, -amount) 
+                flash("Removed "+str(amount)+" "+item.unit.name+" "+item.name+". Now has "+str(get_inventory_item(item_id).amount))
+            except:
+                flash("Invalid amount: "+request.form["added_amount_"+input_id])
+
+    return render_template("task.html", task=get_task(task_id), task_type=get_task_type_by_name(get_task(task_id).task_type), units=UNITS)
 
 @app.route('/uncomplete_task/<int:task_id>', methods = ['POST'])
 @check_login_wrapper
 def uncomplete_task_page(task_id):
     uncomplete_task(task_id)
-    return render_template("task.html", task=get_task(task_id))
+    return render_template("task.html", task=get_task(task_id), task_type=get_task_type_by_name(get_task(task_id).task_type), units=UNITS)
 
 @app.route('/add_task',  methods = ['GET', 'POST'])
 @check_login_wrapper
 def add_task():
     if request.method == 'GET':
-        return render_template("add_task.html", task_types=get_task_types(), units=UNITS)
+        return render_template("add_task.html", task_types=get_task_types(), units=UNITS, inventory=get_inventory())
     else:
         print(request.form)
         task_type_name = request.form['task_type']
@@ -278,24 +313,36 @@ def add_task():
         fields = {}
         reminders = []
         reminder_datestrings = []
+        items_of_use = []
         for field in request.form:
             if field[:8] == "reminder":
                 reminder_date_str = request.form[field]
                 reminder_date = datetime.strptime(reminder_date_str, '%Y-%m-%d')
                 reminders.append(reminder_date)
                 reminder_datestrings.append(reminder_date_str)
+            elif field[:4] == "item":
+                inventory_item = get_inventory_item_by_name(request.form[field])
+                if inventory_item == None:
+                    if login_session["language"] == "English":
+                        flash("Invalid item name: " + request.form[field])
+                    else:
+                        flash("Nombre de un articulo inválido: " + request.form[field])
+                    return render_template("add_task.html", task_types=get_task_types(), inventory=get_inventory(), units=UNITS)
+                items_of_use.append(inventory_item.id)
             elif field not in ["task_type", "due_date", "description"]: # TODO - don't let the use make custom fields using these names
                 fields[field] = request.form[field]
-        succeeded, msg = create_task(get_user(login_session["username"]), due_date, description, task_type_name, fields, reminders, reminder_datestrings)
+
+        succeeded, msg_eng, msg_spanish = create_task(get_user(login_session["username"]), due_date, description, task_type_name, fields, reminders, reminder_datestrings, items_of_use)
         if succeeded:
-            flash("Task added successfully!")
+            flash("Task added successfully!" if login_session["language"] == "English" else "Tarea agregado exitosamente!")
         else:
-            flash(msg)
-        return render_template("add_task.html", task_types=get_task_types())
+            flash(msg_eng if login_session["language"] == "English" else msg_spanish)
+        return render_template("add_task.html", task_types=get_task_types(), inventory=get_inventory(), units=UNITS)
 
 @app.route('/update_task/<int:task_id>',  methods = ['POST'])
 @check_login_wrapper
-def update_task(task_id):
+def update_task_page(task_id):
+    print("updating task", task_id)
     task_type_name = request.form['task_type']
     task_type = get_task_type_by_name(task_type_name)
     due_date_str = request.form["due_date"]
@@ -304,6 +351,7 @@ def update_task(task_id):
     fields = {}
     reminders = []
     reminder_datestrings = []
+
     for field in request.form:
         if field[:8] == "reminder":
             reminder_date_str = request.form[field]
@@ -313,13 +361,16 @@ def update_task(task_id):
         elif field not in ["task_type", "due_date", "description"]: # TODO - don't let the use make custom fields using these names
             fields[field] = request.form[field]
     update_task(task_id, due_date, description, task_type_name, fields, reminders, reminder_datestrings)
-    flash("Task added successfully!")
-    return render_template("task.html", task=get_task(task_id))
+    flash("Task updated successfully!" if login_session["language"] == "English" else "Tarea actualizado exitosamente!") 
+    print("updated", reminders)
+    task = get_task(task_id)
+    return render_template("task.html", task=task, items_of_use=[get_inventory_item(item_id) for item_id in task.items_of_use], task_type=get_task_type_by_name(task.task_type), units=UNITS,  inventory=get_inventory())
 
 @app.route('/copy_task/<int:task_id>',  methods = ['GET', 'POST'])
 @check_login_wrapper
 def copy_task(task_id):
-    return render_template("copy_task.html", task=get_task(task_id), task_type=get_task_type_by_name(get_task(task_id).task_type))
+    task = get_task(task_id)
+    return render_template("copy_task.html", task=task, task_type=get_task_type_by_name(task.task_type), items_of_use=[get_inventory_item(item_id) for item_id in task.items_of_use])
 
 
 @app.route('/search',  methods = ['GET', 'POST'])
@@ -391,7 +442,7 @@ def inventory():
 @app.route('/add_unit', methods = ['POST'])  
 @check_login_wrapper
 def add_unit_page():
-    if "abbreviation" not in request.form:
+    if "abbreviation" not in request.form or request.form["abbreviation"] == "":
         abbreviation = request.form["unit_name"]
     else:
         abbreviation = request.form["abbreviation"]
@@ -401,7 +452,7 @@ def add_unit_page():
 @app.route('/add_inventory_type', methods = ['POST'])  
 @check_login_wrapper
 def add_inventory_type_page():
-    add_inventory_type(request.form["type_name"], abbreviation)
+    add_inventory_type(request.form["type_name"])
     return redirect(url_for('inventory'))
 
 @app.route('/add_item', methods = ['POST'])  

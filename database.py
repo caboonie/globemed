@@ -40,6 +40,16 @@ def create_task_type(task_type, required_fields, optional_fields, reminders, col
     session.add(task_type)
     session.commit()
 
+def remove_task_type(task_type_id):
+    task_type = get_task_type(task_type_id)
+    if task_type == None:
+        return
+    print("removing", task_type.task_type)
+    session.delete(task_type)
+    session.commit()
+
+
+
 def get_task_types():
     return session.query(TaskType).all()
 
@@ -50,6 +60,7 @@ def get_task_type_by_name(name):
     return session.query(TaskType).filter_by(task_type=name).first()
 
 
+# remove_task_type(get_task_type_by_name("order supplies").id)
 task_type = get_task_type_by_name("appointment")
 if not task_type:
     create_task_type("appointment", ["patient_name"], [], [], "blue")
@@ -60,22 +71,23 @@ def clean_fields(task_type_meta):
     return ([field if type(field) == str else list(field)[0] for field in task_type_meta.required_fields],
             [field if type(field) == str else list(field)[0] for field in task_type_meta.optional_fields])
 
-def create_task(user, due_date, description, task_type, fields, reminders, reminder_datestrings):
+def create_task(user, due_date, description, task_type, fields, reminders, reminder_datestrings, items_of_use):
     task_type_meta = get_task_type_by_name(task_type)
     required_fields, optional_fields = clean_fields(task_type_meta)
     if not task_type_meta:
-        return False, "Not a valid task type"
+        return False, "Not a valid task type", "Tipo de tarea inválido"
     elif not all([field in fields for field in required_fields]):
-        return False, "Missing required_fields: " + " ".join([field for field in required_fields if field not in fields])
+        return False, "Missing required_fields: " + " ".join([field for field in required_fields if field not in fields]), "Campos necesarios que faltan: " + " ".join([field for field in required_fields if field not in fields])
     elif not all([field in required_fields+optional_fields for field in fields]):
-        return False, "Contains extraneous fields: " + " ".join([field for field in fields if field not in required_fields+optional_fields])
+        return False, "Contains extraneous fields: " + " ".join([field for field in fields if field not in required_fields+optional_fields]), "Se incluye campos extraños: " + " ".join([field for field in fields if field not in required_fields+optional_fields])
 
     task = Task(creator_id=user.id, created_datetime=datetime.now(), created_datestring=datetime.now().strftime("%Y-%m-%d"), due_datetime=due_date, due_datestring=due_date.strftime("%Y-%m-%d"), 
-        description=description, task_type=task_type, completed=False, fields=fields, reminders=reminders, reminder_datestrings=reminder_datestrings, color=task_type_meta.color)
+        description=description, task_type=task_type, completed=False, fields=fields, reminders=reminders, reminder_datestrings=reminder_datestrings, color=task_type_meta.color, 
+        items_of_use=items_of_use)
     
     session.add(task)
     session.commit()
-    return True, task
+    return True, task, task
 
 def update_task(task_id, due_date, description, task_type, fields, reminders, reminder_datestrings):
     task = session.query(Task).filter_by(id=task_id).first()

@@ -2,96 +2,118 @@
 
 {% block body %}
 
-  
+  <style type="text/css">
+#dashboard_nav {
+  border: solid grey 2px;
+  border-radius: 2px;
+}
+</style>
+
 
   <h1>{{text['Admin Dashboard']}}</h1>
 
-  <form action="{{ url_for('add_user') }}" method = 'post'>
-  	<h2>{{text['Create a New User']}}</h2>
-    <div class="form-group">
-      <input id="input_username1" class="username form-control" type="text" name="username" placeholder="{{text['Username']}}">
-    </div>
+  <div class="row">
+        <div style="width: 40%; max-width: 600px; float: left; ">
 
-    <div class="form-group">
-      <input id="input_password1" class="username form-control" type="text" name="password" placeholder="{{text['Password']}}">
-    </div>
+          <form action="{{ url_for('add_user') }}" method = 'post'>
+          	<h2>{{text['Create a New User']}}</h2>
+            <div class="form-group">
+              <input id="input_username1" class="username form-control" type="text" name="username" placeholder="{{text['Username']}}">
+            </div>
 
-    <input type="checkbox" name="is_admin" value="is_admin">
-	  <label for="is_admin"> {{text['Is an admin']}} </label><br>
+            <div class="form-group">
+              <input id="input_password1" class="username form-control" type="text" name="password" placeholder="{{text['Password']}}">
+            </div>
 
-    <button class="btn btn-success" type="submit" id="submit_new_user"> {{text['Add New User']}} </button>
-  </form>
+            <input type="checkbox" name="is_admin" value="is_admin">
+        	  <label for="is_admin"> {{text['Is an admin']}} </label><br>
 
-
-  <h2>{{text['Existing Task Types']}}</h2>
-  <p> TODO search filter here </p>
-  <ul>
-  {% for task_type in task_types %}
-    <li>{{task_type.task_type}}
-      <ul>
-        <li> TODO - make these a popup?</li>
-        <li>{{text['Required']}}: {% for field in task_type.required_fields %} {{field}}, {% endfor %} </li>
-        <li>{{text['Optional']}}: {% for field in task_type.optional_fields %} {{field}}, {% endfor %} </li> 
-        <li>{{text['Reminders']}}: {% for reminder in task_type.reminders %}  {{reminder.amount}} {{reminder.unit}}(s), {% endfor %} </li>
-      </ul>
-    </li>
-
-  {% endfor %}
-  </ul>
-
-  <!-- create new task types with appropriate fields... -->
-  <form action="{{ url_for('add_task_type') }}" method = 'post'>
-    <h2>{{text['Create a New Task Type']}}</h2>
-    <div class="form-group">
-      <input id="task_type" class="username form-control" type="text" name="task_type" placeholder="{{text['Task Type']}}" required>
-      <label for="task_color">{{text['Select color']}}:</label>
-      <input type="color" id="task_color" name="task_color" value="#ff0000">
-    </div>
-
-    <div id="task_typefields" class="form_group">
-        
-    </div>
-
-    <button type="button" onclick="addField()" style="margin: 10px;">{{text['Add Text Field']}}</button>
-    <button type="button" onclick="addOptionField()" style="margin: 10px;">{{text['Add Option Field']}}</button>
-
-    <div id="task_reminders" class="form_group">
-    </div>
-
-    <!-- templates for cloning -->
-    <div style="display: none;">
-
-        <input id="text_field_template" class="username form-control" type="text" name="field" placeholder="{{text['Text Field']}}">
+            <button class="btn btn-success" type="submit" id="submit_new_user"> {{text['Add New User']}} </button>
+          </form>
+        </div>
+        <div style="margin-left:120px; width: calc(60% - 120px); float: left; ">
 
 
-        <span id="required_label">{{text['Required']}}: </span>
-        <input class="pointer" type="checkbox" id="required_template" name="required_template" value="required" checked>
-        <button id="remove_template" type="button" style="margin: 10px">{{text['Remove']}}</button>
-        <!-- Todo make this remove a little X on the side -->
+          
 
-        <div id="choice_field_template">        </div>
+          <!-- create new task types with appropriate fields... -->
+          <form action="{{ url_for('add_task_type') }}" method = 'post'>
+            <h2>{{text['Create a New Task Type']}}</h2>
+            <div>
+              <input id="task_type" class="username form-control" type="text" name="task_type" placeholder="{{text['Task Type']}}" required style="display: inline; max-width: 300px; margin-bottom: 10px">
+              <br>
+              <label for="task_color">{{text['Select color']}}:</label>
+              <input type="color" id="task_color" name="task_color" value="#ff0000">
+            </div>
 
-        <input id="option_template" class="username form-control" type="text" name="option" placeholder="{{text['Option']}}">
-        <button type="button" id="add_template"  style="margin: 10px;">{{text['Add Option']}}</button>
-        <span id="other_label">{{text['Allow Other']}}: </span>
-        <input class="pointer" type="checkbox" id="other_template" name="other_template" value="other" checked>
+            <div id="task_typefields" class="form_group">
+                
+            </div>
 
-        <div id="reminder_box"></div>
-        <input id="reminder_number_template" class="username form-control" type="number" name="reminder_number">
-        <select id="reminder_unit_template" name="reminder_unit">
-            {% for unit in units %}
-                <option value="{{unit}}">{{unit}}</option>
-            {% endfor %}
-          </select>
+            <button type="button" onclick="addField()" style="margin: 10px;">{{text['Add Text Field']}}</button>
+            <button type="button" onclick="addOptionField()" style="margin: 10px;">{{text['Add Option Field']}}</button>
 
-    </div>
-    
-    <button type="button" onclick="addReminder()" style="margin: 10px;">{{text['Add Reminder']}}</button>
-    <br>
+            <div id="task_reminders" class="form_group">
+            </div>
+
+            <!-- templates for cloning -->
+            <div style="display: none;">
+
+                <input id="text_field_template" class="username form-control" type="text" name="field" placeholder="{{text['Text Field']}}" style="margin-top: 20px;">
 
 
-    <button class="btn btn-success" type="submit" id="submit_new_user"> {{text['Add Task Type']}} </button>
-  </form>
+                <span id="required_label">{{text['Required']}}: </span>
+                <input class="pointer" type="checkbox" id="required_template" name="required_template" value="required" checked style="margin-right: 15px;">
+                <img class="no-border-button" id="remove_template" width="25px" height="25px" src="{{url_for('static', filename='red_x.png')}}">
+                <!-- Todo make this remove a little X on the side -->
+
+                <div id="choice_field_template">        </div>
+
+                <input id="option_template" class="username form-control" type="text" name="option" placeholder="{{text['Option']}}">
+                <button type="button" id="add_template"  style="margin: 10px;">{{text['Add Option']}}</button>
+                <span id="other_label">{{text['Allow Other']}}: </span>
+                <input class="pointer" type="checkbox" id="other_template" name="other_template" value="other" checked style="margin-right: 15px;">
+
+                <div id="reminder_box"></div>
+                <input id="reminder_number_template" class="username form-control" type="number" name="reminder_number" style="width:300px;">
+                <select id="reminder_unit_template" name="reminder_unit">
+                    {% for unit in UNITS %}
+                        <option value="{{unit}}">{{unit}}</option>
+                    {% endfor %}
+                  </select>
+
+            </div>
+            
+            <button type="button" onclick="addReminder()" style="margin: 10px;">{{text['Add Reminder']}}</button>
+            <br>
+
+
+            <button class="btn btn-success" type="submit" id="submit_new_user"> {{text['Add Task Type']}} </button>
+          </form>
+
+          <h2>{{text['Existing Task Types']}}</h2>
+          <ul>
+          {% for task_type in task_types %}
+            <li>
+                <!-- <a style="display: inline" href="/remove_task_type/{{task_type.id}}"><img width="20px" height="20px" src="{{url_for('static', filename='red_x.png')}}"></a> -->
+                <span class="tooltip2" >
+                    {{task_type.task_type}}
+                    <span class="tooltiptext" style="width: 1000px;">
+                        <ul>
+                            <li>{{text['Required']}}: {% for field in task_type.required_fields %} {{field}}, {% endfor %} </li>
+                            <li>{{text['Optional']}}: {% for field in task_type.optional_fields %} {{field}}, {% endfor %} </li> 
+                            <li>{{text['Reminders']}}: {% for reminder in task_type.reminders %}  {{reminder.amount}} {{reminder.unit}}(s), {% endfor %} </li>
+                        </ul>
+                    </span>
+                </span>
+
+              
+            </li>
+
+          {% endfor %}
+          </ul>
+      </div>
+  </div>
 
 
 <script type="text/javascript">
@@ -99,12 +121,20 @@
   
   function addField() {
 
+    jQuery("#task_typefields").append($("<br>"));
+
     var box = jQuery("#text_field_template").clone();
-    box.css("display","block");
+    box.css("display","inline");
     box.attr("id", "field_"+count)
     box.attr("name", "field_"+count)
-    box.attr("placeholder", "Field "+count)
+    box.attr("placeholder", "{{text['Field']}} "+count)
     jQuery("#task_typefields").append(box);
+
+    var remove = jQuery("#remove_template").clone();
+    remove.css("display","inline");
+    remove.attr("id", "remove_"+count)
+    remove.attr("onclick", "removeField("+count+")")
+    jQuery("#task_typefields").append(remove);
 
     var required_label = jQuery("#required_label").clone();
     required_label.css("display","inline");
@@ -117,11 +147,7 @@
     required.attr("name", "required_"+count)
     jQuery("#task_typefields").append(required);
 
-    var remove = jQuery("#remove_template").clone();
-    remove.css("display","inline");
-    remove.attr("id", "remove_"+count)
-    remove.attr("onclick", "removeField("+count+")")
-    jQuery("#task_typefields").append(remove);
+    
     
 
     count += 1;
@@ -133,15 +159,15 @@
     box.css("display","block");
     box.attr("id", "field_"+count)
 
-    var label = $("<p></p>").text("Enter a reminder for (number) (unit) before the due date");
+    var label = $("<p></p>").text("{{text['Enter a reminder for (number) (unit) before the due date']}}");
     box.append(label)
     var number = jQuery("#reminder_number_template").clone();
-    number.css("display","block");
+    number.css("display","inline");
     number.attr("name", "reminder_number_"+count)
     box.append(number);
 
-    var unit = jQuery("#reminder_unit_template").clone();
-    unit.css("display","block");
+     var unit = jQuery("#reminder_unit_template").clone();
+    unit.css("display","inline");
     unit.attr("id", "reminder_unit_"+count)
     unit.attr("name", "unit_"+count)
     box.append(unit);
@@ -152,6 +178,10 @@
     remove.attr("onclick", "removeField("+count+")")
     box.append(remove)
 
+   
+
+    
+
     jQuery("#task_reminders").append(box);
     
 
@@ -160,11 +190,13 @@
 
   // TODO - clean this up
   function addOptionField() {
+    jQuery("#task_typefields").append($("<br>"));
+
     var box = jQuery("#choice_field_template").clone();
     box.css("display","block");
     box.attr("id", "field_"+count)
     box.attr("name", "option_field_"+count)
-    box.attr("placeholder", "Field "+count)
+    box.attr("placeholder", "{{text['Field']}} "+count)
     box.data("count", 2)
     jQuery("#task_typefields").append(box);
 
@@ -196,30 +228,39 @@
     required.attr("name", "required_"+count)
     jQuery("#task_typefields").append(required);
 
-    var remove = jQuery("#remove_template").clone();
-    remove.css("display","inline");
-    remove.attr("id", "remove_"+count)
-    remove.attr("onclick", "removeField("+count+")")
-    jQuery("#task_typefields").append(remove);
 
 
     var option_prompt = jQuery("#text_field_template").clone();
+    option_prompt.css("display","inline");
     option_prompt.attr("name", "option_field_"+count)
     option_prompt.attr("id", "option_field_"+count)
-    option_prompt.attr("placeholder", "Field "+count)
+    option_prompt.attr("placeholder", "{{text['Field']}} "+count)
     box.append(option_prompt);
 
+
+
+    var remove_option = jQuery("#remove_template").clone();
+    remove_option.css("display","inline");
+    remove_option.attr("id", "remove_"+count)
+    remove_option.attr("onclick", "removeField("+count+", 1)")
+    box.append(remove_option);   
+
+    box.append( $("<br>"))
+
     var option = jQuery("#option_template").clone();
+    option.css("display","inline");
+    option.css("margin-left","20px");
     option.attr("name", "option_"+count+"_1")
     option.attr("id", "option_"+count+"_1")
-    option.attr("placeholder", "Option 1")
+    option.attr("placeholder", "{{text['Option']}} 1")
     box.append(option);
 
     var remove_option = jQuery("#remove_template").clone();
     remove_option.css("display","inline");
     remove_option.attr("id", "remove_"+count+"_1")
     remove_option.attr("onclick", "removeOption("+count+", 1)")
-    box.append(remove_option);    
+    box.append(remove_option);
+     
 
     count += 1;
   }
@@ -230,9 +271,11 @@
     console.log("called add option", id, box.data.count)
 
     var option = jQuery("#option_template").clone();
+    option.css("display","inline");
+    option.css("margin-left","20px");
     option.attr("name", "option_"+id+"_"+box.data("count"))
     option.attr("id", "option_"+id+"_"+box.data("count"))
-    option.attr("placeholder", "Option "+box.data("count"))
+    option.attr("placeholder", "{{text['Option']}} "+box.data("count"))
     box.append(option);
 
     var remove_option = jQuery("#remove_template").clone();
@@ -249,8 +292,8 @@
   function removeOption(field_id, option_id){
 
     console.log("called removeOption with", field_id, option_id)
-    jQuery("#field_"+field_id+"_option_"+option_id).css("display", "none");
-    jQuery("#field_"+field_id+"_option_"+option_id).val(""); // clear out the value so that this field is not saved to database upon submission
+    jQuery("#option_"+field_id+"_"+option_id).css("display", "none");
+    jQuery("#option_"+field_id+"_"+option_id).val(""); // clear out the value so that this field is not saved to database upon submission
     jQuery("#remove_"+field_id+"_"+option_id).css("display", "none");
 
   }

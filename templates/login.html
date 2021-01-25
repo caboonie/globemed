@@ -2,9 +2,9 @@
 
 {% block body %}
 
-<div id = "login-container">
+<div id = "login-container" style=" width: 550px; margin: auto; margin-top: 120px; border-radius: 10px; padding: 8px;">
 
-
+  <h4>{{text['Please type your username and password to log in']}}</h4>
   <form action="{{ url_for('login') }}" method = 'post'>
     <div class="form-group">
       <input id="input-username1" class="username form-control" type="text" name="username" placeholder="{{text['Username']}}">
@@ -14,7 +14,9 @@
       <input id="input-password1" class="password form-control" type="password" name="password" placeholder="{{text['Password']}}">
     </div>
 
-    <button class="btn btn-success" type="submit" id="submit-login"> {{text['Log In']}} </button>
+    <div style="text-align: center;">
+	    <button style="margin:0px;" class="btn btn-success" type="submit" id="submit-login"> {{text['Log In']}} </button>
+	</div>
   </form>
 
 

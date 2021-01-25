@@ -7,8 +7,9 @@
           <input type="text" id="keywords"  name="keywords" placeholder="{{text['Keyword']}}(s)..." value="{{keywords}}">
           <input  type="text" name="names" placeholder="{{text['Name']}}(s)..." value="{{names}}">
           <input  type="text" name="fields" placeholder="{{text['Field']}}(s)..." value="{{fields}}">
-          <label for="start_date">{{text['Min Date']}}: </label><input id="start_date" type="date" name="start_date">
-          <label for="end_date">{{text['Max Date']}}: </label><input id="end_date" type="date" name="end_date">
+          <br>
+          <label for="start_date">{{text['Min Date']}}: </label><input id="start_date" type="date" name="start_date" value={{start_date}}>
+          <label for="end_date">{{text['Max Date']}}: </label><input id="end_date" type="date" name="end_date" value={{end_date}}>
           <br>
           <label for="task_type">{{text['Task Type']}}: </label>
           <select name="task_type" id="task_type_search">
@@ -24,13 +25,15 @@
 
 	<h1>{{text['Search Results']}}</h1>
 
-  <h3>{{text['Choose a task type']}}:</h3>
+  <h3 style="display: inline;">{{text['Filter by task type']}}:</h3>
   <select id="task_type" name="task_type" onchange="filterByTaskType()">
     <option value="all">{{text['all']}}</option>
     {% for task_type in task_types %}
       <option value="{{task_type.task_type}}">{{task_type.task_type}}</option>
     {% endfor %}
   </select>
+  <br>
+  <br>
 
   <div id="table-container">
 	  <table id="hidden-task-table" style="display: none;">
@@ -44,7 +47,15 @@
   	    </tr>
   	{% for task in tasks %}
   		<tr class="task-row">
-  			<td><a href="/task/{{task.id}}"> {{ task.task_type }} </a></td>
+  			<td><a href="/task/{{task.id}}"> <span class="tooltip2">{{ task.task_type }}
+          <span class="tooltiptext" style="max-width: 1000px; white-space: nowrap;">
+            <ul style="padding-left:14px;">
+              {% for field in task.fields%}
+                <li> {{field}}: {{task.fields[field]}} </li>
+              {% endfor %}
+            </ul>
+          </span>
+        </span> </a></td>
   			{% if task.description|length > 20 %}
   		        <td class="desc-col"> {{ task.description[:20] }} <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></td>
   		    {% else %}

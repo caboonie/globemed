@@ -50,6 +50,8 @@ class Task(Base):
     reminders = Column(PickleType) # list of datetimes
     reminder_datestrings = Column(PickleType) # list of datetimes
     color = Column(String)
+    items_of_use = Column(PickleType) # list of Inventory Item IDs
+
 
 class TaskType(Base):
     __tablename__ = "task_types"

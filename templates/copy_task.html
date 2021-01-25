@@ -46,7 +46,11 @@
   				console.log(reminder.data("unit"))
 	  			if (reminder.data("unit") == "day"){
 	  				remind_date = due_date - parseInt(reminder.data("amount"))*24*60*60*1000
-	  			}
+	  			} else if (reminder.data("unit") == "week" || reminder.data("unit") == "semana") {
+		            remind_date = due_date - parseInt(reminder.data("amount"))*7*24*60*60*1000
+		          } else if (reminder.data("unit") == "month" || reminder.data("unit") == "mes") {
+		            remind_date = due_date - parseInt(reminder.data("amount"))*30*24*60*60*1000
+		          }
 	  			var remind_date = new Date(remind_date);
 	  			var day = ("0" + remind_date.getDate()).slice(-2);
 				var month = ("0" + (remind_date.getMonth() + 1)).slice(-2);
@@ -62,6 +66,8 @@
   		$(reminder).data("user-changed", "true");
   	}
 
+  	
+
   </script>
 
 
@@ -72,6 +78,10 @@
     	<button id="remove_template" type="button" style="margin: 10px">{{text['Remove']}}</button>
     	<div id="reminder_box"></div>
         <input id="reminder_date_template" class="username form-control" type="date" name="reminder_number">
+
+        <div id="item_box"></div>
+	    <div id="item_auto_box_template" class="autocomplete" style="width:300px;"></div>
+	    <input id="item_template" class="username form-control" type="text" name="item_number" >
     </div>
 
 
@@ -90,7 +100,11 @@
 	  				<select value="{{task.fields[field]}}" class="required_{{task_type.task_type}}" id="{{task_type.task_type}}_{{key}}" name="{{key}}" >
 					  	<option value=""></option>
 					  	{% for option in field[key] %}
-						    <option value="{{option}}">{{option}}</option>
+						    {% if option ==  task.fields[key] %}
+							    <option value="{{option}}" selected>{{option}}</option>
+					  		{% else %}
+					  			<option value="{{option}}">{{option}}</option>
+					  		{% endif %}
 					    {% endfor %}
 					  </select>
 	  			{% endfor %}
@@ -105,10 +119,14 @@
 			  	{% if field is mapping %}
 		  			{% for key in field %}
 		  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:</label>
-		  				<select value="{{task.fields[field]}}" id="{{task_type.task_type}}_{{key}}" name="{{key}}" >
+		  				<select value="{{task.fields[key]}}" id="{{task_type.task_type}}_{{key}}" name="{{key}}" >
 						  	<option value=""></option>
 						  	{% for option in field[key] %}
-							    <option value="{{option}}">{{option}}</option>
+						  		{% if option ==  task.fields[key] %}
+								    <option value="{{option}}" selected>{{option}}</option>
+						  		{% else %}
+						  			<option value="{{option}}">{{option}}</option>
+						  		{% endif %}
 						    {% endfor %}
 						  </select>
 		  			{% endfor %}
@@ -123,7 +141,7 @@
 		  	{% for reminder in task_type.reminders %}
 		  		<div id="field_{{loop.index}}">
 			  		<p> {{reminder.amount}} {{reminder.unit}}(s): </p>
-			  		<input value="{{task.reminders[loop.index]}}" name="reminder_{{loop.index}}" type="date" id="reminder_{{outer_loop.index}}_{{loop.index}}" class="reminder" data-amount="{{reminder.amount}}" data-unit="{{reminder.unit}}" data-user-changed="false" onchange="userChange(this)">
+			  		<input name="reminder_{{loop.index}}" type="date" id="reminder_{{loop.index}}" class="reminder" data-amount="{{reminder.amount}}" data-unit="{{reminder.unit}}" data-user-changed="false" onchange="userChange(this)">
 			  		<button id="remove_template" type="button" style="margin: 10px" onclick="removeField({{loop.index}})">{{text['Remove']}}</button>
 			  	</div>
 		  	{% endfor %}
@@ -132,6 +150,20 @@
 	    </div>
 
 	  	<button type="button" onclick="addReminder('{{task_type.task_type}}')" style="margin: 10px;">{{text['Add Reminder']}}</button>
+
+	  	<div id="task_items" class="form_group">
+	        <div><h4>{{text['Items of Potential Use']}}:</h4></div>
+	        {% for item in items_of_use %}
+		        <div id="field_{{loop.index}}">
+		        	<input id="item_template" class="username form-control" type="text" name="item_{{loop.index}}" value="{{item.name}}" style="display: inline;">
+
+				    <img class="no-border-button" id="remove_template" width="25px" height="25px" src="{{url_for('static', filename='red_x.png')}}" onclick="removeField({{loop.index}})">
+			    </div>	 
+			    {% endfor %}     
+	      </div>
+
+      <button type="button" onclick="addItem('task_items')" style="margin: 10px;">{{text['Add Another Item']}}</button>
+      <br>
 
 	  	 <button class="btn btn-success" type="submit" id="submit_new_user"> {{text['Add Task']}} </button>
 	  </div>
@@ -142,6 +174,9 @@
 
 
 <script type="text/javascript">
+
+calculateAllDates();
+
 count = -1
 	
 function addReminder(task_type) {
@@ -168,6 +203,39 @@ function addReminder(task_type) {
     count -= 1;
   }
 
+  function addItem(id) {
+    var box = jQuery("#item_box").clone();
+    box.css("display","block");
+    box.attr("id", "field_"+count)
+
+    var label = $("<p></p>").text("{{text['Enter an Item Name']}}: ");
+    box.append(label)
+
+    var inner_box = jQuery("#item_auto_box_template").clone();
+    inner_box.css("display","inline");
+    inner_box.attr("id", "item_auto_"+count)
+    box.append(inner_box);
+
+    var item_input = jQuery("#item_template").clone();
+    item_input.css("display","inline");
+    item_input.attr("name", "item_"+count)
+    item_input.attr("id", "item_"+count)
+    /*initiate the autocomplete function on the item input element, and pass along the countries array as possible autocomplete values:*/
+    autocomplete(item_input[ 0 ], countries);
+    inner_box.append(item_input);
+
+    var remove = jQuery("#remove_template").clone();
+    remove.css("display","inline");
+    remove.attr("id", "remove_"+count)
+    remove.attr("onclick", "removeField("+count+")")
+    box.append(remove)
+
+    jQuery("#"+id).append(box);
+    
+
+    count -= 1;
+  }
+
 function removeField(id) {
     jQuery("#field_"+id).css("display", "none");
     jQuery("#field_"+id).val(""); // clear out the value so that this field is not saved to database upon submission
@@ -179,6 +247,17 @@ function removeField(id) {
     }
     jQuery("#remove_"+id).css("display", "none");
   }
+
+/*An array containing all the country names in the world:*/
+var countries = [{% for name in name_to_item %}
+           "{{name}}",
+          {% endfor %}
+          ];
+var name_to_item = { {% for name in name_to_item %}
+           "{{name}}":[{{name_to_item[name].amount}}, "{{name_to_item[name].unit.name}}"],
+          {% endfor %}
+          };
+console.log("countries", countries)
 
 </script>
   	
