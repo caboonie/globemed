@@ -162,7 +162,7 @@ def add_task_type():
                 if request.form["option_{}_{}".format(count, i)] != "":
                     options.append(request.form["option_{}_{}".format(count, i)])
                 i += 1
-            if "other"+count in request.form:
+            if "other_"+count in request.form:
                 options.append("Other")
             print("options here", options)
             if "required_"+count in request.form:
@@ -329,8 +329,11 @@ def add_task():
                         flash("Nombre de un articulo inválido: " + request.form[field])
                     return render_template("add_task.html", task_types=get_task_types(), inventory=get_inventory(), units=UNITS)
                 items_of_use.append(inventory_item.id)
-            elif field not in ["task_type", "due_date", "description"]: # TODO - don't let the use make custom fields using these names
-                fields[field] = request.form[field]
+            elif field not in ["task_type", "due_date", "description"] and "_other" not in field: # TODO - don't let the use make custom fields using these names
+                if request.form[field] == "Other":
+                    fields[field] = request.form[field+"_other"]
+                else:
+                    fields[field] = request.form[field]
 
         succeeded, msg_eng, msg_spanish = create_task(get_user(login_session["username"]), due_date, description, task_type_name, fields, reminders, reminder_datestrings, items_of_use)
         if succeeded:

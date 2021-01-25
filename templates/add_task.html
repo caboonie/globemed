@@ -74,14 +74,16 @@
   		$(reminder).data("user-changed", "true");
   	}
 
-    function checkOther(task_type, key) {
-      selected = $("#"+task_type+"_"+key+ " option:selected")
+    function checkOther(task_id, key) {
+      console.log("called checkOther")
+      selected = $("#"+task_id+"_"+key+ " option:selected")
+      // console.log($("#"+task_id+"_"+key), "#"+task_id+"_"+key, selected, selected.val())
       if (selected.val() == "Other") {
         // Then show the text field underneath
-        $("#"+task_type+"_"+key+"_othertext").css("display", "inline")
+        $("#"+task_id+"_"+key+"_othertext").css("display", "inline")
 
       } else {
-        $("#"+task_type+"_"+key+"_othertext").css("display", "none")
+        $("#"+task_id+"_"+key+"_othertext").css("display", "none")
       }
     }
 
@@ -127,17 +129,17 @@
 	  		{% if field is mapping %}
 	  			{% for key in field %}
 	  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:</label>
-	  				<select class="required_{{task_type.task_type}}" id="{{task_type.task_type}}_{{key}}" name="{{key}}" onchange="checkOther({{task_type.task_type}}, {{key}})" >
+	  				<select class="required_{{task_type.task_type}}" id="{{task_type.id}}_{{key}}" name="{{key}}" onchange="checkOther('{{task_type.id}}', '{{key}}')" >
 					  	<option value=""></option>
 					  	{% for option in field[key] %}
                 {% if option == "Other"%}
-                  <option id="{{task_type.task_type}}_{{key}}_other" value="{{option}}">{{text['Other']}}</option>
+                  <option id="{{task_type.id}}_{{key}}_other" value="{{option}}">{{text['Other']}}</option>
                 {% else %}
 						      <option value="{{option}}">{{option}}</option>
                 {% endif %}
 					    {% endfor %}
 					  </select>
-            <input style="display: none" type="text"  id="{{task_type.task_type}}_{{key}}_othertext" name="{{key}}_other" >
+            <input style="display: none" type="text"  id="{{task_type.id}}_{{key}}_othertext" name="{{key}}_other" placeholder="...">
 	  			{% endfor %}
 	  		{% else %}
 		  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input class="required_{{task_type.task_type}}" type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
@@ -150,12 +152,17 @@
 			  	{% if field is mapping %}
 		  			{% for key in field %}
 		  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:</label>
-		  				<select id="{{task_type.task_type}}_{{key}}" name="{{key}}" >
+		  				<select id="{{task_type.id}}_{{key}}" name="{{key}}"  onchange="checkOther('{{task_type.id}}', '{{key}}')">
 						  	<option value=""></option>
 						  	{% for option in field[key] %}
-							    <option value="{{option}}">{{option}}</option>
+							    {% if option == "Other"%}
+                    <option id="{{task_type.id}}_{{key}}_other" value="{{option}}">{{text['Other']}}</option>
+                  {% else %}
+                    <option value="{{option}}">{{option}}</option>
+                  {% endif %}
 						    {% endfor %}
 						  </select>
+              <input style="display: none" type="text"  id="{{task_type.id}}_{{key}}_othertext" name="{{key}}_other" placeholder="...">
 		  			{% endfor %}
 		  		{% else %}
 		  			<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
