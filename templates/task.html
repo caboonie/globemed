@@ -101,13 +101,18 @@
 	  	{% for field in task_type.required_fields %}
 	  		{% if field is mapping %}
 	  			{% for key in field %}
-	  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:  </label>
-	  				<select required class="required_{{task_type.task_type}}" id="{{task_type.task_type}}_{{key}}" name="{{key}}" value={{task.fields[field]}}>
+	  				<label for="{{task_type.id}}_{{key}}">{{key}}:  </label>
+	  				<select required class="required_{{task_type.id}}" id="{{task_type.id}}_{{key}}" name="{{key}}" value="{{task.fields[field]}}"  onchange="console.log('here3'); checkOther('{{task_type.id}}', '{{key}}')">
 					  	<option value=""></option>
 					  	{% for option in field[key] %}
-						    <option value="{{option}}">{{option}}</option>
+						    {% if option == "Other"%}
+			                  <option value="{{option}}">{{text['Other']}}</option>
+			                {% else %}
+								<option value="{{option}}">{{option}}</option>
+			                {% endif %}
 					    {% endfor %}
 					  </select>
+					  <input style="display: none" type="text"  id="{{task_type.id}}_{{key}}_othertext" name="{{key}}_other" placeholder="...">
 	  			{% endfor %}
 	  		{% else %}
 		  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:  </label><input required class="required_{{task_type.task_type}}" type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}" value={{task.fields[field]}}>
@@ -119,13 +124,18 @@
 		  	{% for field in task_type.optional_fields %}
 			  	{% if field is mapping %}
 		  			{% for key in field %}
-		  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:  </label>
-		  				<select id="{{task_type.task_type}}_{{key}}" name="{{key}}" value={{task.fields[field]}}>
+		  				<label for="{{task_type.id}}_{{key}}">{{key}}:  </label>
+		  				<select id="{{task_type.id}}_{{key}}" name="{{key}}" value="{{task.fields[field]}}"  onchange="checkOther('{{task_type.id}}', '{{key}}')">
 						  	<option value=""></option>
 						  	{% for option in field[key] %}
-							    <option value="{{option}}">{{option}}</option>
+							    {% if option == "Other"%}
+				                  <option value="{{option}}">{{text['Other']}}</option>
+				                {% else %}
+									<option value="{{option}}">{{option}}</option>
+				                {% endif %}
 						    {% endfor %}
 						  </select>
+						  <input style="display: none" type="text"  id="{{task_type.id}}_{{key}}_othertext" name="{{key}}_other" placeholder="...">
 		  			{% endfor %}
 		  		{% else %}
 		  			<label for="{{task_type.task_type}}_{{field}}">{{field}}:  </label><input type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}" value={{task.fields[field]}}>
@@ -174,6 +184,8 @@
 
 
 <script type="text/javascript">
+
+
 
 	function updateLabel(count) {
 		console.log("trying to update", count)

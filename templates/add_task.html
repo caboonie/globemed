@@ -74,18 +74,7 @@
   		$(reminder).data("user-changed", "true");
   	}
 
-    function checkOther(task_id, key) {
-      console.log("called checkOther")
-      selected = $("#"+task_id+"_"+key+ " option:selected")
-      // console.log($("#"+task_id+"_"+key), "#"+task_id+"_"+key, selected, selected.val())
-      if (selected.val() == "Other") {
-        // Then show the text field underneath
-        $("#"+task_id+"_"+key+"_othertext").css("display", "inline")
 
-      } else {
-        $("#"+task_id+"_"+key+"_othertext").css("display", "none")
-      }
-    }
 
   </script>
 
@@ -133,7 +122,7 @@
 					  	<option value=""></option>
 					  	{% for option in field[key] %}
                 {% if option == "Other"%}
-                  <option id="{{task_type.id}}_{{key}}_other" value="{{option}}">{{text['Other']}}</option>
+                  <option value="{{option}}">{{text['Other']}}</option>
                 {% else %}
 						      <option value="{{option}}">{{option}}</option>
                 {% endif %}
@@ -156,7 +145,7 @@
 						  	<option value=""></option>
 						  	{% for option in field[key] %}
 							    {% if option == "Other"%}
-                    <option id="{{task_type.id}}_{{key}}_other" value="{{option}}">{{text['Other']}}</option>
+                    <option value="{{option}}">{{text['Other']}}</option>
                   {% else %}
                     <option value="{{option}}">{{option}}</option>
                   {% endif %}

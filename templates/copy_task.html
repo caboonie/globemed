@@ -97,7 +97,7 @@
 	  		{% if field is mapping %}
 	  			{% for key in field %}
 	  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:</label>
-	  				<select value="{{task.fields[field]}}" class="required_{{task_type.task_type}}" id="{{task_type.task_type}}_{{key}}" name="{{key}}" >
+	  				<select value="{{task.fields[field]}}" class="required_{{task_type.id}}" id="{{task_type.task_type}}_{{key}}" name="{{key}}" onchange="checkOther('{{task_type.id}}', '{{key}}')" >
 					  	<option value=""></option>
 					  	{% for option in field[key] %}
 						    {% if option ==  task.fields[key] %}
@@ -107,6 +107,7 @@
 					  		{% endif %}
 					    {% endfor %}
 					  </select>
+					  <input style="display: none" type="text"  id="{{task_type.id}}_{{key}}_othertext" name="{{key}}_other" placeholder="...">
 	  			{% endfor %}
 	  		{% else %}
 		  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input value="{{task.fields[field]}}" class="required_{{task_type.task_type}}" type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
@@ -119,7 +120,7 @@
 			  	{% if field is mapping %}
 		  			{% for key in field %}
 		  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:</label>
-		  				<select value="{{task.fields[key]}}" id="{{task_type.task_type}}_{{key}}" name="{{key}}" >
+		  				<select value="{{task.fields[key]}}" id="{{task_type.id}}_{{key}}" name="{{key}}" onchange="checkOther('{{task_type.id}}', '{{key}}')" >
 						  	<option value=""></option>
 						  	{% for option in field[key] %}
 						  		{% if option ==  task.fields[key] %}
@@ -129,6 +130,7 @@
 						  		{% endif %}
 						    {% endfor %}
 						  </select>
+						  <input style="display: none" type="text"  id="{{task_type.id}}_{{key}}_othertext" name="{{key}}_other" placeholder="...">
 		  			{% endfor %}
 		  		{% else %}
 		  			<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input value="{{task.fields[field]}}" type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">

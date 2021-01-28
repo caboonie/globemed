@@ -478,6 +478,20 @@ function autocomplete(inp, arr) {
 }
 
 
+// For use in adding tasks with "Other" options
+function checkOther(task_id, key) {
+      console.log("called checkOther")
+      selected = $("#"+task_id+"_"+key+ " option:selected")
+      console.log($("#"+task_id+"_"+key), "#"+task_id+"_"+key, selected, selected.val())
+      if (selected.val() == "Other" || selected.val() == "Otra") {
+        // Then show the text field underneath
+        $("#"+task_id+"_"+key+"_othertext").css("display", "inline")
+
+      } else {
+        $("#"+task_id+"_"+key+"_othertext").css("display", "none")
+      }
+    }
+
 
 </script>
 
