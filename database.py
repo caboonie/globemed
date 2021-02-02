@@ -187,7 +187,7 @@ def advanced_search(keywords=[], names=[], fields=[], start_date=None, end_date=
                 continue
         if task_type and task_type != task.task_type:
             continue
-        if completed and completed != "All" and ((completed == "True" and task.completed) or (completed == "False" and !task.completed)):
+        if completed and (completed != "All" and ((completed == "True" and not task.completed) or (completed == "False" and task.completed))):
             continue
         matches = 0
         for keyword in keywords:
