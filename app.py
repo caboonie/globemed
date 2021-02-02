@@ -15,6 +15,10 @@ WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", 
 def check_login_wrapper(func):
     @wraps(func)
     def inner(*args, **kwargs):
+        if "language" not in login_session:
+            login_session['language'] = 'Spanish'
+            UNITS = ["dia", "semana", "mes"]
+            WEEKDAYS = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabados", "Domingo"]
         if "username" not in login_session:
             flash("Please login to see that page." if login_session["language"] == "English" else "Inicie sesión para ver esa página")
             return redirect(url_for('login'))
@@ -423,7 +427,11 @@ def advanced_search_page():
         if "task_type" in request.form:
             task_type = request.form["task_type"]
 
-        results = advanced_search(keywords = keywords, names = names, fields = fields, start_date=start_date, end_date=end_date, task_type=task_type)
+        completed = 'All'
+        if "completed" in request.form:
+            completed = request.form["completed"]
+
+        results = advanced_search(keywords = keywords, names = names, fields = fields, start_date=start_date, end_date=end_date, task_type=task_type, completed=completed)
         # return render_template("search_result.html", tasks=search_descr(search_text))
         return render_template("search.html", tasks=results, col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(),
             keywords=" ".join(keywords), names = " ".join(names), fields = " ".join(fields), start_date=start_date, end_date=end_date, task_type=task_type)
@@ -485,4 +493,4 @@ def change_item_amount_page():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host= '0.0.0.0')

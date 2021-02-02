@@ -13,11 +13,17 @@
           <br>
           <label for="task_type">{{text['Task Type']}}: </label>
           <select name="task_type" id="task_type_search">
-          <option value=""></option>
-          {% for task_type in task_types %}
-            <option value="{{task_type.task_type}}">{{task_type.task_type}}</option>
-          {% endfor %}
-        </select>
+            <option value=""></option>
+            {% for task_type in task_types %}
+              <option value="{{task_type.task_type}}">{{task_type.task_type}}</option>
+            {% endfor %}
+          </select>
+          <label for="completed">{{text['Filter by Completed']}}: </label>
+          <select name="completed" id="completed">
+            <option value="True">{{text['All']}}</option>
+              <option value="True">{{text['Complete']}}</option>
+              <option value="False">{{text['Incomplete']}}</option>
+          </select>
         <br>
 
           <button class="btn btn-success" type="submit" > {{text['Search']}} </button>

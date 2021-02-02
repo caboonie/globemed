@@ -176,7 +176,7 @@ def search_descr(search_text):
             filtered_tasks.append(task)
     return filtered_tasks
 
-def advanced_search(keywords=[], names=[], fields=[], start_date=None, end_date=None, task_type=None):
+def advanced_search(keywords=[], names=[], fields=[], start_date=None, end_date=None, task_type=None, completed=None):
     ranked_tasks = []
     for task in get_tasks():
         if start_date:
@@ -186,6 +186,8 @@ def advanced_search(keywords=[], names=[], fields=[], start_date=None, end_date=
             if datetime.strptime(end_date, "%Y-%m-%d") < task.due_datetime:
                 continue
         if task_type and task_type != task.task_type:
+            continue
+        if completed and completed != "All" and ((completed == "True" and task.completed) or (completed == "False" and !task.completed)):
             continue
         matches = 0
         for keyword in keywords:
