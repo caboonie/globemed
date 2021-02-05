@@ -31,7 +31,7 @@ def verify_password(username, password):
 
 user = session.query(User).filter_by(username='admin').first()
 if not user:
-    create_user('admin','nimda', True)
+    create_user('admin','globemednimda21', True)
 
 # Task Type Interactions
 
