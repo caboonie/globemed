@@ -15,6 +15,10 @@ WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", 
 def check_login_wrapper(func):
     @wraps(func)
     def inner(*args, **kwargs):
+        if "language" not in login_session:
+            login_session['language'] = 'Spanish'
+            UNITS = ["dia", "semana", "mes"]
+            WEEKDAYS = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabados", "Domingo"]
         if "username" not in login_session:
             flash("Please login to see that page." if login_session["language"] == "English" else "Inicie sesión para ver esa página")
             return redirect(url_for('login'))
