@@ -33,6 +33,7 @@
   		}
   		container.css("display", "block")
   		jQuery(".required_"+task_type).each(function(){
+        console.log("this",this)
 			$(this).attr("required", "true")
 		})
   		previous_container = container
@@ -106,19 +107,19 @@
 	  <div class="form-group" >
 	  	<br>
 	  	<!-- <div><h4>{{text['Required Fields']}}: </h4></div> -->
-	  	<label for="due_date">{{text['Due Date']}}: </label><input class="required_{{task_type.task_type}}"  type="date" id="due_date_{{loop.index}}" name="due_date" onchange="calculateAllDates({{loop.index}})">
+	  	<label for="due_date_{{loop.index}}">{{text['Due Date']}}: </label><input class="required_{{task_type.id}}"  type="date" id="due_date_{{loop.index}}" name="due_date" onchange="calculateAllDates({{loop.index}})">
 	  	<!-- TODO - for some reason, description isn't required??? -->
       <br>
 	  	<label for="description">{{text['Description']}}: </label>
       <br>
-      <textarea class="required_{{task_type.task_type}}" name="description" rows="4" cols="50"> </textarea>
+      <textarea class="required_{{task_type.id}}" name="description" rows="4" cols="50"> </textarea>
 
 	  	{% for field in task_type.required_fields %}
         <br>
 	  		{% if field is mapping %}
 	  			{% for key in field %}
 	  				<label for="{{task_type.task_type}}_{{key}}">{{key}}:</label>
-	  				<select class="required_{{task_type.task_type}}" id="{{task_type.id}}_{{key}}" name="{{key}}" onchange="checkOther('{{task_type.id}}', '{{key}}')" >
+	  				<select class="required_{{task_type.id}}" id="{{task_type.id}}_{{key}}" name="{{key}}" onchange="checkOther('{{task_type.id}}', '{{key}}')" >
 					  	<option value=""></option>
 					  	{% for option in field[key] %}
                 {% if option == "Other"%}
@@ -131,7 +132,7 @@
             <input style="display: none" type="text"  id="{{task_type.id}}_{{key}}_othertext" name="{{key}}_other" placeholder="...">
 	  			{% endfor %}
 	  		{% else %}
-		  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input class="required_{{task_type.task_type}}" type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
+		  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:</label><input class="required_{{task_type.id}}" type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}">
 		  	{% endif %}
 	  	{% endfor %}
 

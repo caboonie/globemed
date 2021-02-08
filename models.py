@@ -51,6 +51,7 @@ class Task(Base):
     reminder_datestrings = Column(PickleType) # list of datetimes
     color = Column(String)
     items_of_use = Column(PickleType) # list of Inventory Item IDs
+    # person_responsible = Column(String)
 
 
 class TaskType(Base):
@@ -84,4 +85,7 @@ class InventoryItem(Base):
     danger_amount = Column(Float)
     buy_more_amount = Column(Float)
 
-
+# class Patient(Base):
+#     __tablename__ = "patient"
+#     id = Column(Integer, primary_key=True)
+#     name = Column(String)

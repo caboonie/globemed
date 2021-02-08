@@ -50,8 +50,18 @@
                 
             </div>
 
-            <button type="button" onclick="addField()" style="margin: 10px;">{{text['Add Text Field']}}</button>
-            <button type="button" onclick="addOptionField()" style="margin: 10px;">{{text['Add Option Field']}}</button>
+            <button type="button" onclick="addField()" style="margin: 10px; margin-right: 0px;">{{text['Add Text Field']}}</button>
+            <span style="width:20px; text-align: center; border: solid gray 1px; border-radius: 10px; color: gray; " class="tooltip2">i
+                 <span class="tooltiptext" style="width: 1000px;">
+                     If you have parameters for this task type that you would like information for please add.
+                 </span>
+            </span>
+            <button type="button" onclick="addOptionField()" style="margin: 10px; margin-right: 0px;">{{text['Add Option Field']}}</button>
+            <span style="width:20px; text-align: center; border: solid gray 1px; border-radius: 10px; color: gray; " class="tooltip2">i
+                 <span class="tooltiptext" style="width: 1000px;">
+                      For a given field if there are specific options use this button.
+                 </span>
+            </span>
 
             <div id="task_reminders" class="form_group">
             </div>
