@@ -9,6 +9,19 @@
   border-radius: 2px;
 }
 
+.weekday_box {
+  /* Rotate from top left corner (not default) */
+  transform-origin: 0 0;
+  transform: rotate(90deg);
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding-left: 15px;
+}
+
+td {
+  border: none !important;
+}
 </style>
 
  <!-- TODO make these button pretty arrows -->
@@ -18,12 +31,107 @@
   <a class="pretty-button" href="/monthly_tasks/{{datestring}}">{{text['Month']}}</a>
   <br>
 
-  <h2 >{{text['Tasks']}}</h2>
+  <!-- <h2 >{{text['Tasks']}}</h2> -->
   <h2 id="day_header" style="display: inline">{{text['Monday']}}, {{datestrings[0][5:]}} - {{text['Sunday']}}, {{datestrings[6][5:]}}</h2>
   <a  id="prev_button"><img style="margin-top: -10px;" src="{{url_for('static', filename='arrow_left.png')}}" class="arrow"></a>
   <a  id="next_button"><img style="margin-top: -10px;" src="{{url_for('static', filename='arrow_right.png')}}" class="arrow"></a>
   <br>
   <br>
+
+
+  
+
+  {% if overdue_tasks|length > 0 %}
+  <h4> Overdue Tasks: </h4>
+
+  <div id="table-container">
+    <table id="hidden-overdue-task-table" style="display: none; width:300px; " >
+      <tr>
+          <th> {{text['Task Type']}} 
+            <img onclick="sortTable(0)" src="{{url_for('static', filename='arrow_up.png')}}" class="arrow">
+            <img onclick="sortTable(0, true)" src="{{url_for('static', filename='arrow_down.png')}}" class="arrow">
+          </th>
+          <th>{{text['Description']}}  
+            <img onclick="sortTable(1)" src="{{url_for('static', filename='arrow_up.png')}}" class="arrow">
+            <img onclick="sortTable(1, true)" src="{{url_for('static', filename='arrow_down.png')}}" class="arrow">
+          </th>
+          {% for col in col_strings %}
+            <th> {{ col }} 
+              <img onclick="sortTable({{loop.index+1}})" src="{{url_for('static', filename='arrow_up.png')}}" class="arrow">
+              <img onclick="sortTable({{loop.index+1}}, true)" src="{{url_for('static', filename='arrow_down.png')}}" class="arrow">
+            </th>
+          {% endfor %}
+              
+          </tr>
+
+
+      {% for task in overdue_tasks %}
+        <tr class="task-row" >
+          <td><a href="/task/{{task.id}}"> {{ task.task_type }} 
+            <span style="color: red;">
+              ({{text['Overdue']}})
+            </span>
+           </a></td>
+          {% if task.description|length > 20 %}
+              <td class="desc-col"> {{ task.description[:20] }} <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></td>
+          {% else %}
+            <td class="desc-col"> {{ task.description }} </td>
+          {% endif %}
+
+          {% for col in col_vars %}
+            <td> {{ task[col] }} </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <br>
+  <br>
+  {% endif %}
+
+
+  <table>
+  {% for tasks in tasks_by_day %}
+    <tr>
+      <td style="position: relative;">
+        <div class="weekday_box"> Lunes </div>
+        <table>
+          <tr>
+            <td> poifjdlksjfdkslfjlsdfksd </td>
+          </tr>
+          <tr>
+            <td> poifjdlksjfdkslfjlsdfksd </td>
+          </tr>
+          <tr>
+            <td> poifjdlksjfdkslfjlsdfksd </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- <h3><a href="/daily_tasks/{{datestrings[loop.index]}}">{{WEEKDAYS[loop.index-1]}}, {{datestrings[loop.index-1]}}</a></h3>
+    <div id="table-container-{{weekdays[loop.index]}}" style="margin-left: 20px;">
+  	  <table id="hidden-task-table-{{weekdays[loop.index]}}" style="display: none; width:300px; " >
+    		
+    	{% for task in tasks %}
+    		<tr class="task-row" >
+          {% if task.completed %}
+    			  <td style="border:none; text-decoration: line-through"><a href="/task/{{task.id}}"> {{ task.task_type }} (Completed) </a></td>
+          {% else %}
+            <td style="border:none"><a href="/task/{{task.id}}"> {{ task.task_type }} </a></td>
+          {% endif %}
+    			{% if task.description|length > 20 %}
+    		        <td style="border:none" class="desc-col"> {{ task.description[:20] }} <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></td>
+    		    {% else %}
+    		    	<td style="border:none" class="desc-col"> {{ task.description }} </td>
+    		    {% endif %}
+    	    </tr>
+        {% endfor %}
+      </table>
+    </div> -->
+  {% endfor %}
+</table>
 
 
   <h3 style="display: inline;">{{text['Filter by task type']}}:</h3>
@@ -35,25 +143,6 @@
   </select>
   <br>
   <br>
-
-  {% for tasks in tasks_by_day %}
-    <h3><a href="/daily_tasks/{{datestrings[loop.index]}}">{{WEEKDAYS[loop.index-1]}}, {{datestrings[loop.index-1]}}</a></h3>
-    <div id="table-container-{{weekdays[loop.index]}}" style="margin-left: 20px;">
-  	  <table id="hidden-task-table-{{weekdays[loop.index]}}" style="display: none; width:300px; " >
-    		
-    	{% for task in tasks %}
-    		<tr class="task-row" >
-    			<td style="border:none"><a href="/task/{{task.id}}"> {{ task.task_type }} </a></td>
-    			{% if task.description|length > 20 %}
-    		        <td style="border:none" class="desc-col"> {{ task.description[:20] }} <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></td>
-    		    {% else %}
-    		    	<td style="border:none" class="desc-col"> {{ task.description }} </td>
-    		    {% endif %}
-    	    </tr>
-        {% endfor %}
-      </table>
-    </div>
-  {% endfor %}
 
  
   
@@ -105,22 +194,46 @@
       for (i = 0; i < (rows.length); i++) {
         td = rows[i].getElementsByTagName("TD")[0];
         task_type = td.getElementsByTagName("A")[0].innerHTML.trim();
-        console.log(i, task_type, "space", type_input, "space", task_type==type_input)
+        // console.log(i, task_type, "space", type_input, "space", task_type==type_input)
         if (task_type == type_input || "all" == type_input) {
-          console.log('here2', task_type == type_input, "all" == type_input)
+          // console.log('here2', task_type == type_input, "all" == type_input)
           table.append(rows[i])
 
         } 
-        console.log('here')
+        
       }
 
-      console.log("removing", "#task-table-"+weekday)
+      // console.log("removing", "#task-table-"+weekday)
       jQuery("#task-table-"+weekday).remove()
       table.attr("id", "task-table-"+weekday)
       jQuery("#table-container-"+weekday).append(table)
 
 
     }
+    console.log('here4')
+
+    var table = $("<table id='overdue-task-table-copy' style='width:300px'></table>").text("");
+
+    prev_table = jQuery("#hidden-overdue-task-table").clone();
+
+    rows = prev_table.find('> tbody > tr');
+    table.append(rows[0]);
+    console.log("OVERDUE TABLE", rows.length)
+    for (i = 1; i < (rows.length); i++) {
+    td = rows[i].getElementsByTagName("TD")[0];
+      task_type = td.getElementsByTagName("A")[0].innerHTML.trim();
+      console.log(i, task_type, "space", type_input, "space", task_type==type_input)
+      if (task_type == type_input || "all" == type_input) {
+        table.append(rows[i])
+
+      } 
+      console.log('here')
+    }
+    
+    jQuery("#task-table").remove()
+    table.attr("id", "task-table")
+    jQuery("#table-container").append(table)
+
     
     
 

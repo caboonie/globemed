@@ -31,12 +31,12 @@ def verify_password(username, password):
 
 user = session.query(User).filter_by(username='admin').first()
 if not user:
-    create_user('admin','globemednimda21', True)
+    create_user('admin','nimda', True)
 
 # Task Type Interactions
 
-def create_task_type(task_type, required_fields, optional_fields, reminders, color):
-    task_type = TaskType(task_type=task_type, required_fields=required_fields, optional_fields=optional_fields, reminders=reminders, color=color)
+def create_task_type(task_type, required_fields, optional_fields, reminders, color, due_date_text="Fecha de vencimiento"):
+    task_type = TaskType(task_type=task_type, due_date_text=due_date_text, required_fields=required_fields, optional_fields=optional_fields, reminders=reminders, color=color)
     session.add(task_type)
     session.commit()
 
@@ -61,11 +61,26 @@ def get_task_type_by_name(name):
 
 
 # remove_task_type(get_task_type_by_name("order supplies").id)
-task_type = get_task_type_by_name("appointment")
-if not task_type:
-    create_task_type("appointment", ["patient_name"], [], [], "blue")
+# task_type = get_task_type_by_name("appointment")
+# if not task_type:
+#     create_task_type("appointment", ["patient_name"], [], [], "blue")
 
-# Task Interactions
+task_type = get_task_type_by_name("Consultorio general/pediatría/ginecobstetricia")
+if not task_type:
+    create_task_type("Consultorio general/pediatría/ginecobstetricia", ["Nombre del paciente", "Fecha de Nacimiento", "DNI", 
+        {"Causa o razón del control":["TODO1","TODO2"]}, {"Provisión usada y cantidad":["TODO1","TODO2"]}, 
+        {"Provisiones para proximo control":["TODO1","TODO2"]}, "Otras notas"], [], [], "blue", due_date_text="Fecha de próximo control")
+
+task_type = get_task_type_by_name("Nutrición")
+if not task_type:
+    create_task_type("Nutrición", ["Nombre del paciente", "Fecha de Nacimiento", "DNI", 
+        {"Causa o razón del control":["TODO1","TODO2"]}, {"Provisión usada y cantidad":["TODO1","TODO2"]}], [], [], "green", due_date_text="Fecha de próximo control")
+
+task_type = get_task_type_by_name("Farmacia")
+if not task_type:
+    create_task_type("Farmacia", ["Nombre del paciente", "Fecha de Nacimiento", "DNI"], [], [], "orange", due_date_text="Fecha de vencimiento")
+    
+    # Task Interactions"
 
 def clean_fields(task_type_meta):
     return ([field if type(field) == str else list(field)[0] for field in task_type_meta.required_fields],
@@ -123,6 +138,15 @@ def get_tasks():
 
 def get_task(task_id):
     return session.query(Task).filter_by(id=task_id).first()
+
+def get_overdue_tasks(datestring):
+    date = datetime.strptime(datestring, "%Y-%m-%d")
+    tasks = []
+    for task in get_tasks():
+        # print("task due", task.due_datestring, task.reminder_datestrings, date)
+        if task.due_datetime < date and not task.completed:
+            tasks.append(task)
+    return tasks
 
 def get_tasks_day(date):
     tasks = []

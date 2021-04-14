@@ -42,11 +42,13 @@ class Task(Base):
     creator_id = Column(Integer)
     created_datetime = Column(DateTime)
     created_datestring = Column(String)
+
     due_datetime = Column(DateTime)
     due_datestring = Column(String)
     description = Column(String)
     completed = Column(Boolean) # completed or not
     fields = Column(PickleType) # dictionary of strings to strings
+
     reminders = Column(PickleType) # list of datetimes
     reminder_datestrings = Column(PickleType) # list of datetimes
     color = Column(String)
@@ -58,6 +60,7 @@ class TaskType(Base):
     __tablename__ = "task_types"
     id = Column(Integer, primary_key=True)
     task_type = Column(String)
+    due_date_text = Column(String)
     required_fields = Column(PickleType) # list of strings that are required keys in the fields entry of a task
     optional_fields = Column(PickleType) # list of strings that are allowed but not required keys in the fields entry of a task
     reminders = Column(PickleType) # list of dates for when reminders should go off

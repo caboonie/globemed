@@ -202,14 +202,15 @@ def tasks():
 def daily_tasks_():
     date = datetime.now().strftime("%Y-%m-%d")
     return render_template("daily_tasks.html", tasks=get_tasks_day(date), col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), datestring=date,
-        weekday = datetime.strptime(date, "%Y-%m-%d").strftime("%A"))
+        weekday = datetime.strptime(date, "%Y-%m-%d").strftime("%A"), overdue_tasks = get_overdue_tasks(date))
 
 @app.route('/daily_tasks/<date>')
 @check_login_wrapper
 def daily_tasks(date):
     print("date", date)
+    today_datestring = datetime.now().strftime("%Y-%m-%d")
     return render_template("daily_tasks.html", tasks=get_tasks_day(date), col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), datestring=date,
-        weekday = datetime.strptime(date, "%Y-%m-%d").strftime("%A"))
+        weekday = datetime.strptime(date, "%Y-%m-%d").strftime("%A"), overdue_tasks = get_overdue_tasks(today_datestring))
 
 
 @app.route('/weekly_tasks/<date>')
@@ -220,9 +221,10 @@ def weekly_tasks(date):
     date_datetime = datetime.strptime(date, "%Y-%m-%d")
     monday =  date_datetime - timedelta(days = date_datetime.weekday())
     monday_datestr = monday.strftime("%Y-%m-%d")
+    today_datestring = datetime.now().strftime("%Y-%m-%d")
     return render_template("weekly_tasks.html", tasks_by_day=get_tasks_week(monday_datestr), col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), 
         datestrings = [(monday+timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)], datestring=monday.strftime("%Y-%m-%d"),
-        weekdays=WEEKDAYS)
+        weekdays=WEEKDAYS, overdue_tasks = get_overdue_tasks(today_datestring))
 
 
 @app.route('/weekly_tasks')
@@ -245,9 +247,10 @@ def monthly_tasks(date):
         for notification in day_notifications:
             legend[notification.task.task_type] = notification.task.color
     print("rendering month ", WEEKDAYS)
+    today_datestring = datetime.now().strftime("%Y-%m-%d")
     return render_template("monthly_tasks.html", tasks_by_day=tasks_by_day, col_strings = ["Due Date"], col_vars = ["due_datestring"], task_types=get_task_types(), 
         month =  datetime.strptime(date, "%Y-%m-%d").strftime("%B, %Y"), today_datestring= datetime.now().strftime("%Y-%m-%d"), datestring=date, headers_by_day=headers_by_day,
-        weekdays=WEEKDAYS, legend=legend)
+        weekdays=WEEKDAYS, legend=legend, overdue_tasks = get_overdue_tasks(today_datestring))
 
 @app.route('/monthly_tasks')
 @check_login_wrapper
@@ -493,4 +496,4 @@ def change_item_amount_page():
 
 
 if __name__ == '__main__':
-    app.run(host= '0.0.0.0')
+    app.run(host= '0.0.0.0', debug=True)
