@@ -27,13 +27,14 @@
 
 </style>
 
+<h1>{{text["Monthly Tasks"]}}</h1>
+
 <!-- TODO make these button pretty arrows -->
   <span style="font-size: 18px; color: grey;">{{text['Tasks by']}}: </span>
   <a class="pretty-button" href="/daily_tasks/{{datestring}}">{{text['Day']}}</a>
   <a class="pretty-button" href="/weekly_tasks/{{datestring}}">{{text['Week']}}</a>
   <a style="background-color: lightgrey; color:grey;" class="pretty-button" href="/monthly_tasks/{{datestring}}">{{text['Month']}}</a>
   <br>
-  <h2 id="month_header">{{text['Tasks']}}</h2>
 
   <h2 style="display: inline"> {{month}}</h2>
   <a  id="prev_button"><img style="margin-top: -10px; width: 20px; height: 20px;" src="{{url_for('static', filename='arrow_left.png')}}" class="arrow"></a>

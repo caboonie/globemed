@@ -45,6 +45,9 @@ class Task(Base):
 
     due_datetime = Column(DateTime)
     due_datestring = Column(String)
+    birthdate = Column(String)
+    name = Column(String)
+    dni = Column(String)
     description = Column(String)
     completed = Column(Boolean) # completed or not
     fields = Column(PickleType) # dictionary of strings to strings

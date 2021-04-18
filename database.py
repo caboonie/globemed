@@ -67,18 +67,18 @@ def get_task_type_by_name(name):
 
 task_type = get_task_type_by_name("Consultorio general/pediatría/ginecobstetricia")
 if not task_type:
-    create_task_type("Consultorio general/pediatría/ginecobstetricia", ["Nombre del paciente", "Fecha de Nacimiento", "DNI", 
+    create_task_type("Consultorio general/pediatría/ginecobstetricia", [ 
         {"Causa o razón del control":["TODO1","TODO2"]}, {"Provisión usada y cantidad":["TODO1","TODO2"]}, 
         {"Provisiones para proximo control":["TODO1","TODO2"]}, "Otras notas"], [], [], "blue", due_date_text="Fecha de próximo control")
 
 task_type = get_task_type_by_name("Nutrición")
 if not task_type:
-    create_task_type("Nutrición", ["Nombre del paciente", "Fecha de Nacimiento", "DNI", 
+    create_task_type("Nutrición", [ 
         {"Causa o razón del control":["TODO1","TODO2"]}, {"Provisión usada y cantidad":["TODO1","TODO2"]}], [], [], "green", due_date_text="Fecha de próximo control")
 
 task_type = get_task_type_by_name("Farmacia")
 if not task_type:
-    create_task_type("Farmacia", ["Nombre del paciente", "Fecha de Nacimiento", "DNI"], [], [], "orange", due_date_text="Fecha de vencimiento")
+    create_task_type("Farmacia", [], [], [], "orange", due_date_text="Fecha de vencimiento")
     
     # Task Interactions"
 
@@ -86,18 +86,22 @@ def clean_fields(task_type_meta):
     return ([field if type(field) == str else list(field)[0] for field in task_type_meta.required_fields],
             [field if type(field) == str else list(field)[0] for field in task_type_meta.optional_fields])
 
-def create_task(user, due_date, description, task_type, fields, reminders, reminder_datestrings, items_of_use):
+def create_task(user, due_date, description, name, birthdate, dni, task_type, fields, reminders, reminder_datestrings, items_of_use):
     task_type_meta = get_task_type_by_name(task_type)
     required_fields, optional_fields = clean_fields(task_type_meta)
     if not task_type_meta:
         return False, "Not a valid task type", "Tipo de tarea inválido"
+    if all([x == None for x in [name, birthdate, dni]]):
+        # TODO spanish
+        return False, "Must include at least one of [name, birthdate, DNI]", "Must include at least one of [name, birthdate, DNI]"
     elif not all([field in fields for field in required_fields]):
         return False, "Missing required_fields: " + " ".join([field for field in required_fields if field not in fields]), "Campos necesarios que faltan: " + " ".join([field for field in required_fields if field not in fields])
     elif not all([field in required_fields+optional_fields for field in fields]):
         return False, "Contains extraneous fields: " + " ".join([field for field in fields if field not in required_fields+optional_fields]), "Se incluye campos extraños: " + " ".join([field for field in fields if field not in required_fields+optional_fields])
 
     task = Task(creator_id=user.id, created_datetime=datetime.now(), created_datestring=datetime.now().strftime("%Y-%m-%d"), due_datetime=due_date, due_datestring=due_date.strftime("%Y-%m-%d"), 
-        description=description, task_type=task_type, completed=False, fields=fields, reminders=reminders, reminder_datestrings=reminder_datestrings, color=task_type_meta.color, 
+        description=description, birthdate = birthdate, dni=dni,
+        name=name, task_type=task_type, completed=False, fields=fields, reminders=reminders, reminder_datestrings=reminder_datestrings, color=task_type_meta.color, 
         items_of_use=items_of_use)
     
     session.add(task)

@@ -81,8 +81,8 @@
 		<input type="number" name="item_number" id="item_number_template" placeholder="amount">
 	</div>
 
-	<h3>{{text['Copy Task']}}</h3>
-	<a href="/copy_task/{{task.id}}"><button class="btn btn-success" type="button" id="copy_task"> {{text['Copy Task']}} </button></a>
+	<!-- <h3>{{text['Copy Task']}}</h3>
+	<a href="/copy_task/{{task.id}}"><button class="btn btn-success" type="button" id="copy_task"> {{text['Copy Task']}} </button></a> -->
 
 
 	<h3>{{text['Update Task']}}</h3>
@@ -98,26 +98,41 @@
 	  	<br>
 	  	<textarea required class="required" name="description" rows="4" cols="50">{{task.description}}</textarea>
 	  	<br>
+	  	<table>
+        
 	  	{% for field in task_type.required_fields %}
+	  		<tr>
 	  		{% if field is mapping %}
 	  			{% for key in field %}
-	  				<label for="{{task_type.id}}_{{key}}">{{key}}:  </label>
-	  				<select required class="required_{{task_type.id}}" id="{{task_type.id}}_{{key}}" name="{{key}}" value="{{task.fields[field]}}"  onchange="console.log('here3'); checkOther('{{task_type.id}}', '{{key}}')">
-					  	<option value=""></option>
-					  	{% for option in field[key] %}
-						    {% if option == "Other"%}
-			                  <option value="{{option}}">{{text['Other']}}</option>
-			                {% else %}
-								<option value="{{option}}">{{option}}</option>
-			                {% endif %}
-					    {% endfor %}
-					  </select>
-					  <input style="display: none" type="text"  id="{{task_type.id}}_{{key}}_othertext" name="{{key}}_other" placeholder="...">
+	  				
+          			<td class="tr-left">
+          				<label for="{{task_type.id}}_{{key}}">{{key}}:  </label>
+          			</td>
+          			<td>
+		  				<select required class="required_{{task_type.id}}" id="{{task_type.id}}_{{key}}" name="{{key}}" value="{{task.fields[field]}}"  onchange="console.log('here3'); checkOther('{{task_type.id}}', '{{key}}')">
+						  	<option value=""></option>
+						  	{% for option in field[key] %}
+							    {% if option == "Other"%}
+				                  <option value="{{option}}">{{text['Other']}}</option>
+				                {% else %}
+									<option value="{{option}}">{{option}}</option>
+				                {% endif %}
+						    {% endfor %}
+						  </select>
+						  <input style="display: none" type="text"  id="{{task_type.id}}_{{key}}_othertext" name="{{key}}_other" placeholder="...">
+					</td>
 	  			{% endfor %}
 	  		{% else %}
-		  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:  </label><input required class="required_{{task_type.task_type}}" type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}" value={{task.fields[field]}}>
+		  		<td class="tr-left">
+		  		<label for="{{task_type.task_type}}_{{field}}">{{field}}:  </label>
+			  	</td>
+			  	<td>
+			  		<input required class="required_{{task_type.task_type}}" type="text" id="{{task_type.task_type}}_{{field}}" name="{{field}}" placeholder="{{field}}" value={{task.fields[field]}}>
+			  	</td>
 		  	{% endif %}
+		  </tr>
 	  	{% endfor %}
+
 
 	  	{% if (task_type.optional_fields | length) > 0%}
 		  	<h4>{{text['Optional Fields']}}</h4>
@@ -142,6 +157,7 @@
 		  		{% endif %}
 		  	{% endfor %}
 		{% endif %}
+		</table>
 
 		<div id="task_reminders" class="form_group">
 		  	<h4>{{text['Current Reminders']}}</h4>

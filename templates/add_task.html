@@ -124,14 +124,34 @@ td {
           <td class="tr-left"><label for="due_date_{{loop.index}}">{{task_type.due_date_text}}: </label></td>
           <td><input class="required_{{task_type.id}}"  type="date" id="due_date_{{loop.index}}" name="due_date" onchange="calculateAllDates({{loop.index}})"></td>
         </tr>
+
+        <tr>
+          <td class="tr-left"><label for="description">{{text['Description']}}: </label></td>
+          <td><input type="text" class="required_{{task_type.id}}" name="description" rows="4" cols="50"> </input></td>
+        </tr>
+
+        <tr>
+          <td class="tr-left"><label for="name_{{loop.index}}">{{text['Patient Name']}}: </label></td>
+          <td><input type="text" id="patient_name_{{loop.index}}" name="patient_name"></td>
+        </tr>
+
+        <tr>
+          <td class="tr-left"><label for="birthdate_{{loop.index}}">{{text['Birthdate']}}: </label></td>
+          <td><input type="date" id="birthdate_{{loop.index}}" name="birthdate"></td>
+        </tr>
+
+        <tr>
+          <td class="tr-left"><label for="dni_{{loop.index}}">{{text['DNI']}}: </label></td>
+          <td><input type="text" id="dni_{{loop.index}}" name="dni"></td>
+        </tr>
+
+        
+
+
       
 	  	<!-- <div><h4>{{text['Required Fields']}}: </h4></div> -->
-	  	
-	  	<!-- TODO - for some reason, description isn't required??? -->
-      <!-- <br>
-	  	<label for="description">{{text['Description']}}: </label> 
-      <br>
-      <textarea class="required_{{task_type.id}}" name="description" rows="4" cols="50"> </textarea>-->
+
+      
 
 	  	{% for field in task_type.required_fields %}
 	  		{% if field is mapping %}

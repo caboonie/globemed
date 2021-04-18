@@ -113,6 +113,7 @@ button {
   visibility: hidden;
   background-color: black;
   max-width: 300px;
+  width: 300px;
   white-space: normal;
   color: #fff;
   padding: 5px;
@@ -519,8 +520,8 @@ function checkOther(task_id, key) {
 </script>
 
 {% set text = {'Task Overview':'Resumen de una tarea', 
-'Task Type':'Tipo de la Tarea', 'Due Date':'Fecha de vencimiento', 'Description':'Descripción', 'Completed':'Terminada', 'Fields':'Campos', 'Reminders': 'Recordatorios', 'Complete Task': 'Completa la tarea', 'Un-Complete Task': 'In-completa la tarea', 'Update Task':'Actualizar la tarea', 'Required Fields':'Campos necesarios', 'Optional Fields': 'Campos opcionales', 'Current Reminders':'Recordatorios actuales', 'Remove':'Eliminar', 'Add Reminder':'Agregar Recordatorio', 'Add Another Reminder':'Agregar Otro Recordatorio', 'Copy Task':'Copiar la tarea', 'Enter a reminder date':'Entra una Fecha para un Recordatorio',
-'Tasks':'Tareas', 'Add Task':'Agregar Tarea', 'Inventory':'Inventario', 'Dashboard':'Tablero', 'Log In':'Iniciar Sesión', 'Log Out':'Cerrar Sesión', 'Hello':'Hola', 'Español':'English', 'footer':'footer spanish', 'TaskGenerator by MIT Globemed - 2021':'TaskGenerator de MIT Globemed - 2021', 'Monday':'Lunes',
+'Task Type':'Tipo de la Tarea', 'Due Date':'Fecha de vencimiento', 'Description':'Descripción', 'Completed':'Terminada', 'Fields':'Campos', 'Reminders': 'Recordatorios', 'Complete Task': 'Completa la tarea', 'Un-Complete Task': 'In-completa la tarea', 'Update Task':'Reprogramar tarea', 'Required Fields':'Campos necesarios', 'Optional Fields': 'Campos opcionales', 'Current Reminders':'Recordatorios actuales', 'Remove':'Eliminar', 'Add Reminder':'Agregar Recordatorio', 'Add Another Reminder':'Agregar Otro Recordatorio', 'Copy Task':'Copiar la tarea', 'Enter a reminder date':'Entra una Fecha para un Recordatorio',
+'Tasks':'Tareas', 'Add Task':'Agregar Tarea', 'Inventory':'Inventario', 'Dashboard':'Tablero', 'Log In':'Iniciar Sesión', 'Log Out':'Cerrar Sesión', 'Hello':'Hola', 'Español':'English', 'footer':'footer spanish', 'TaskGenerator by MIT Globemed - 2021':'TaskGenerator de MIT Globemed - 2021', 'Monday':'Lunes', 'Weekly Tasks':'Lista de tareas semanal', 'Daily Tasks':'Lista de tareas diaria', 'Monthly Tasks':'Lista de tareas mensual',
 
 'Allow Other':'Permitir "otra"','Please type your username and password to log in':'Escriba su nombre de usuario y contraseña para iniciar sesión', 'Enter a reminder for (number) (unit) before the due date': 'Ingrese un recordatorio para (número) (unidad) antes de la fecha de vencimiento','Field':'Campo','Option':'Opción','Reminder':'Recordatorio','Other':'Otra',
 
@@ -536,8 +537,11 @@ function checkOther(task_id, key) {
 
 'Admin Dashboard':'Panel de administración', 'Create a New User':'Crear una nueva usuaria', 'Is an admin':'Es un administrador', 'Add New User':'Agregar usuaria nueva', 'Existing Task Types': 'Tipos de tarea existentes', 'Required':'Necesario', 'Optional':'Opcional', 'Create a New Task Type':'Crear un nuevo tipo de tarea', 'Add Text Field':'Agregar campo de texto', 'Add Option Field':'Agregar campo de opciones', 'Add Option':'Agregar opción', 'Add Task Type':'Agregar Tipo de Tarea', 'Select color':'Eligir un color', 'Username':'Nombre de usuario', 'Password':'Contraseña', 'Text Field':'Campo de Texto',
 
+
 'Add Inventory Item':'Agregar Artículo de Inventario', 'Inventory Overview':'Resumen de Inventario', 'Units':'Unidades', 'Type':'Tipo', 'Add Item':'Agregar Artículo', 'Add Another Item':'Agregar Otro Artículo', 'Adjust Amount':'Ajustar Cantidad', 'Existing Units':'Unidades existentes', 'Add Unit': 'Agregar Unidad', 'Existing Types':'Tipos Existentes', 'Add Type': 'Agregar Tipo', 'Item Name':'Nombre del Artículo', 'Amount':'Cantidad', 'Amount to change by':'Cantidad a cambiar por', 'Abbreviation (optional)':'Abreviatura (opcional)', 'Type Name': 'Nombre del Tipo', 'Danger Amount':'Cantidad de peligro', 'Buy More Amount':'Cantidad de comprar más', 'Search for item':'Buscar por un artículo', 'Danger':'Peligro', 'Buy More':'Comprar más', 'Unit':'Unidad',
-'Disable Pictorial':'Desactivar pictórica', 'Enable Pictoral':'Activar pictórica', 'Sort by Name':'Ordenar por nombre', 'Sort by Quantity':'Ordenar por cantidad'
+'Disable Pictorial':'Desactivar pictórica', 'Enable Pictoral':'Activar pictórica', 'Sort by Name':'Ordenar por nombre', 'Sort by Quantity':'Ordenar por cantidad',
+
+'Birthdate':'Fecha de nacimiento', 'Patient Name':'Nombre del paciente', 'DNI':'DNI'
 } %}
 
 {% set WEEKDAYS = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabados", "Domingo"] %}

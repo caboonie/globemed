@@ -9,20 +9,97 @@
   border-radius: 2px;
 }
 
-.weekday_box {
-  /* Rotate from top left corner (not default) */
-  transform-origin: 0 0;
-  transform: rotate(90deg);
+
+td {
+  /*border: none !important;*/
+  height: 0px;
+  width: 500px;
+  text-align: left;
+}
+
+.task-table-content {
+  /*position: absolute;*/
+  top: 0;
+  padding-top: 5px;
+}
+
+.task-table {
+  width: 100%;
+}
+
+aside {
+  display: block;
+  position: relative;
+  min-height: 100px;
+}
+
+aside h3 {
+  font: bold 12px Sans-Serif;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: #369;
+  color: #fff;
+  padding: 5px 10px;
+  margin: 0 0 10px 0;
+  line-height: 24px;
+}
+
+a {
+  color: black;
+}
+
+/* Class name via Modernizr */
+.csstransforms aside {
+  border-left: 34px solid #369;
+  padding-left: 10px;
+}
+.csstransforms aside h3 {
+  /* Abs positioning makes it not take up vert space */
   position: absolute;
   top: 0;
   left: 0;
-  padding-left: 15px;
+
+  /* Border is the new background */
+  background: none;
+
+  /* Rotate from top left corner (not default) */
+  transform-origin: 0 0;
+  transform: rotate(90deg);
 }
 
-td {
-  border: none !important;
+
+.task-row td {
+  border: none;
+  width: 100%;
 }
+
+.alignleft {
+  float: left;
+}
+.alignright {
+  float: right;
+}
+
+.no-underline {
+  border: 1px solid grey;
+  margin-right: 8px;
+  padding-right: 10px;
+  padding-left: 10px;
+  height: 25px;
+  text-decoration: none;
+}
+
+.complete-box{
+  display: block; height: 25px; width: 25px; min-width: 20px; border: 1px solid gray;
+}
+
+.complete-box:hover{
+  cursor: pointer;
+}
+
 </style>
+
+<h1>{{text["Weekly Tasks"]}}</h1>
 
  <!-- TODO make these button pretty arrows -->
  <span style="font-size: 18px; color: grey;">{{text['Tasks by']}}: </span>
@@ -31,8 +108,9 @@ td {
   <a class="pretty-button" href="/monthly_tasks/{{datestring}}">{{text['Month']}}</a>
   <br>
 
+<br>
   <!-- <h2 >{{text['Tasks']}}</h2> -->
-  <h2 id="day_header" style="display: inline">{{text['Monday']}}, {{datestrings[0][5:]}} - {{text['Sunday']}}, {{datestrings[6][5:]}}</h2>
+  <h2 id="day_header" style="display: inline">{{text['Week']}}, {{datestrings[0][5:]}} - {{datestrings[6][5:]}}</h2>
   <a  id="prev_button"><img style="margin-top: -10px;" src="{{url_for('static', filename='arrow_left.png')}}" class="arrow"></a>
   <a  id="next_button"><img style="margin-top: -10px;" src="{{url_for('static', filename='arrow_right.png')}}" class="arrow"></a>
   <br>
@@ -41,6 +119,83 @@ td {
 
   
 
+  
+
+
+  <table style="margin-left: 20px">
+  {% for tasks in tasks_by_day %}
+    <tr>
+      <td>
+        <aside>
+          <a href="/daily_tasks/{{datestrings[loop.index]}}">
+            <h3> {{WEEKDAYS[loop.index-1]}}</h3>
+            </a> 
+
+          <div class="task-table-content">
+          {% if tasks|length > 0 %}
+            <div id="table-container-{{weekdays[loop.index]}}">
+              <table class="task-table" id="hidden-task-table-{{weekdays[loop.index]}}" style="display: none; width:300px; " >
+              {% for task in tasks %}
+                <tr class="task-row" >
+                  <td>
+                  <div class="alignleft">
+                    <!-- {% if task.completed %}
+                      <span style="text-decoration: line-through"><a href="/task/{{task.id}}"> </a></span>
+
+                    {% else %}
+                      <span ><a href="/task/{{task.id}}"> </a></span>
+                    {% endif %} -->
+
+                    {% if task.description|length > 20 %}
+                          <span class="desc-col"> <a href="/task/{{task.id}}">{{ task.description[:20] }}</a> <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></span>
+                      {% else %}
+                        <a href="/task/{{task.id}}"><span class="desc-col"> {{ task.description }} </span></a>
+                      {% endif %}
+                    </div>
+
+
+                    <div class="alignright complete-box"  onclick="toggleCompleted({{task.id}})">
+                      {% if task.completed %}
+                        X
+                      {% endif %}
+                    </div>
+
+                    <a class="alignright no-underline"  href="/task/{{task.id}}">
+                      {{text["Update Task"]}}
+                    </a>
+                    <div style="clear: both;"></div>
+
+                    <td>
+                  </tr>
+                {% endfor %}
+              </table>
+            </div>
+          {% else %}
+            
+              No hay tareas para hoy.
+            
+          {% endif %}
+          </div>
+        </aside>        
+
+      </td>
+    </tr>
+
+  {% endfor %}
+</table>
+
+
+  <h3 style="display: inline;">{{text['Filter by task type']}}:</h3>
+    <select id="task_type" name="task_type" onchange="filterByTaskType()" style="font-size: 23px; border: solid lightgrey 2px; background: none; border-radius: 4px;">
+    <option  value="all">{{text['all']}}</option>
+    {% for task_type in task_types %}
+      <option value="{{task_type.task_type}}"> {{task_type.task_type}} </option>
+    {% endfor %}
+  </select>
+  <br>
+  <br>
+
+ 
   {% if overdue_tasks|length > 0 %}
   <h4> Overdue Tasks: </h4>
 
@@ -91,63 +246,6 @@ td {
   {% endif %}
 
 
-  <table>
-  {% for tasks in tasks_by_day %}
-    <tr>
-      <td style="position: relative;">
-        <div class="weekday_box"> Lunes </div>
-        <table>
-          <tr>
-            <td> poifjdlksjfdkslfjlsdfksd </td>
-          </tr>
-          <tr>
-            <td> poifjdlksjfdkslfjlsdfksd </td>
-          </tr>
-          <tr>
-            <td> poifjdlksjfdkslfjlsdfksd </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-
-    <!-- <h3><a href="/daily_tasks/{{datestrings[loop.index]}}">{{WEEKDAYS[loop.index-1]}}, {{datestrings[loop.index-1]}}</a></h3>
-    <div id="table-container-{{weekdays[loop.index]}}" style="margin-left: 20px;">
-  	  <table id="hidden-task-table-{{weekdays[loop.index]}}" style="display: none; width:300px; " >
-    		
-    	{% for task in tasks %}
-    		<tr class="task-row" >
-          {% if task.completed %}
-    			  <td style="border:none; text-decoration: line-through"><a href="/task/{{task.id}}"> {{ task.task_type }} (Completed) </a></td>
-          {% else %}
-            <td style="border:none"><a href="/task/{{task.id}}"> {{ task.task_type }} </a></td>
-          {% endif %}
-    			{% if task.description|length > 20 %}
-    		        <td style="border:none" class="desc-col"> {{ task.description[:20] }} <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></td>
-    		    {% else %}
-    		    	<td style="border:none" class="desc-col"> {{ task.description }} </td>
-    		    {% endif %}
-    	    </tr>
-        {% endfor %}
-      </table>
-    </div> -->
-  {% endfor %}
-</table>
-
-
-  <h3 style="display: inline;">{{text['Filter by task type']}}:</h3>
-    <select id="task_type" name="task_type" onchange="filterByTaskType()" style="font-size: 23px; border: solid lightgrey 2px; background: none; border-radius: 4px;">
-    <option  value="all">{{text['all']}}</option>
-    {% for task_type in task_types %}
-      <option value="{{task_type.task_type}}"> {{task_type.task_type}} </option>
-    {% endfor %}
-  </select>
-  <br>
-  <br>
-
- 
-  
-
-
 <script>
   var display_date = new Date(Date.parse("{{datestrings[0]}}"));
   display_date =  new Date(display_date.getTime() + display_date.getTimezoneOffset()*60*1000)
@@ -185,7 +283,7 @@ td {
     for (const weekday of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]) {
 
       console.log("here1", weekday)
-      var table = $("<table id='task-table-copy-"+weekday+"' style='width:300px'></table>").text("");
+      var table = $("<table id='task-table-copy-"+weekday+"' class='task-table'></table>").text("");
 
       prev_table = jQuery("#hidden-task-table-"+weekday).clone();
       rows = prev_table.find('> tbody > tr');
@@ -283,6 +381,21 @@ function sortTable(index, reverse=false) {
     }
   }
 }
+
+function toggleCompleted(task_id) {
+      $.ajax({
+        type : 'POST',
+        url : "/toggle_complete_task/"+task_id,
+        contentType: 'application/json;charset=UTF-8',
+        data : {'data':'changeLanguage'},
+        success: function(data) {
+          location.reload();
+        }
+      });
+      console.log("CLIcCKED to complete!!!", task_id)
+    }
+
+$("html").toggleClass("csstransforms");
 </script>
 
 {%endblock%}

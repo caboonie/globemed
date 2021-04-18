@@ -9,7 +9,41 @@
   border-radius: 2px;
 }
 
+.task-row td {
+  width: 100%;
+}
+
+.alignleft {
+  float: left;
+}
+.alignright {
+  float: right;
+}
+
+.no-underline {
+  border: 1px solid grey;
+  margin-right: 8px;
+  padding-right: 10px;
+  padding-left: 10px;
+  height: 25px;
+  text-decoration: none;
+}
+
+.complete-box{
+  display: block; height: 25px; width: 25px; min-width: 20px; border: 1px solid gray;
+}
+
+.complete-box:hover{
+  cursor: pointer;
+}
+
+a {
+  color: black;
+}
+
 </style>
+
+<h1>{{text["Daily Tasks"]}}</h1>
 
  <!-- TODO make these button pretty arrows -->
  <span style="font-size: 18px; color: grey;">{{text['Tasks by']}}: </span>
@@ -17,7 +51,8 @@
   <a class="pretty-button" href="/weekly_tasks/{{datestring}}">{{text['Week']}}</a>
   <a class="pretty-button" href="/monthly_tasks/{{datestring}}">{{text['Month']}}</a>
 
-  <h2 id="month_header" >{{text['Tasks']}}</h2>
+  <br>
+  <!-- <h2 id="month_header" >{{text['Tasks']}}</h2> -->
   <h2 style="display: inline-block; width:330px;"> {{weekday}}, {{datestring}}</h2>
   <a  id="prev_button"><img style="margin-top: -10px; " src="{{url_for('static', filename='arrow_left.png')}}" class="arrow"></a>
   <a  id="next_button"><img style="margin-top: -10px; " src="{{url_for('static', filename='arrow_right.png')}}" class="arrow"></a>
@@ -35,8 +70,8 @@
   <br>
 
   <div id="table-container">
-	  <table id="hidden-task-table" style="display: none; width:100%;">
-  		<tr>
+	  <table id="hidden-task-table" style="display: none; width:100%; max-width: 900px;">
+  		<!-- <tr>
   			<th> {{text['Task Type']}} 
           <img onclick="sortTable(0)" src="{{url_for('static', filename='arrow_up.png')}}" class="arrow">
           <img onclick="sortTable(0, true)" src="{{url_for('static', filename='arrow_down.png')}}" class="arrow">
@@ -52,25 +87,37 @@
           </th>
   			{% endfor %}
   	        
-  	    </tr>
+  	    </tr> -->
 
     {% for task in overdue_tasks %}
       <tr class="task-row">
-        <td><a href="/task/{{task.id}}"> {{ task.task_type }} 
-          <span style="color: red;">
-            ({{text['Overdue']}})
-          </span>
-         </a></td>
-        
-        {% if task.description|length > 20 %}
-              <td class="desc-col"> {{ task.description[:20] }} <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></td>
-          {% else %}
-            <td class="desc-col"> {{ task.description }} </td>
-          {% endif %}
-            <!-- <td> {{ task.due_datestring }} </td> -->
-            {% for col in col_vars %}
-          <td> {{ task[col] }} </td>
-        {% endfor %}
+        <td>
+         <div class="alignleft">
+            <span style="color: red;">
+              ({{text['Overdue']}})
+            </span>
+            {% if task.due_datestring != datestring %}
+              ({{text['Reminder']}})
+            {% endif %}
+            {% if task.description|length > 40 %}
+                  <span class="desc-col"> <a href="/task/{{task.id}}">{{ task.description[:40] }}</a> <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></span>
+              {% else %}
+                <a href="/task/{{task.id}}"><span class="desc-col"> {{ task.description }} </span></a>
+              {% endif %}
+            </div>
+
+
+            <div class="alignright complete-box"  onclick="toggleCompleted({{task.id}})">
+              {% if task.completed %}
+                X
+              {% endif %}
+            </div>
+
+            <a class="alignright no-underline"  href="/task/{{task.id}}">
+              {{text["Update Task"]}}
+            </a>
+          <div style="clear: both;"></div>
+        </td>
         </tr>
     {% endfor %}
 
@@ -80,21 +127,32 @@
       {% else %}
         <tr class="task-row">
       {% endif %}
-  			<td><a href="/task/{{task.id}}"> {{ task.task_type }} 
-          {% if task.due_datestring != datestring %}
-            ({{text['Reminder']}})
-          {% endif %}
-         </a></td>
-        
-  			{% if task.description|length > 20 %}
-  		        <td class="desc-col"> {{ task.description[:20] }} <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></td>
-  		    {% else %}
-  		    	<td class="desc-col"> {{ task.description }} </td>
-  		    {% endif %}
-  	        <!-- <td> {{ task.due_datestring }} </td> -->
-  	        {% for col in col_vars %}
-  				<td> {{ task[col] }} </td>
-  			{% endfor %}
+  			<td>
+          <div class="alignleft">
+            {% if task.due_datestring != datestring %}
+              ({{text['Reminder']}})
+            {% endif %}
+            {% if task.description|length > 40 %}
+                  <span class="desc-col"> <a href="/task/{{task.id}}">{{ task.description[:40] }}</a> <span class="tooltip2">...<span class="tooltiptext">{{ task.description }}</span></span></span>
+              {% else %}
+                <a href="/task/{{task.id}}"><span class="desc-col"> {{ task.description }} </span></a>
+              {% endif %}
+            </div>
+
+
+            <div class="alignright complete-box"  onclick="toggleCompleted({{task.id}})">
+              {% if task.completed %}
+                X
+              {% endif %}
+            </div>
+
+            <a class="alignright no-underline"  href="/task/{{task.id}}">
+              {{text["Update Task"]}}
+            </a>
+          <div style="clear: both;"></div>
+
+
+          </td>
   	    </tr>
       {% endfor %}
     </table>
@@ -138,7 +196,7 @@
     console.log("filtering")
     var type_input = jQuery("#task_type").val().trim()
     console.log("by ",type_input)
-    var table = $("<table id='task-table-copy' style='width:100%'></table>").text("");
+    var table = $("<table id='task-table-copy' style='width:100%; max-width: 900px;' ></table>").text("");
 
     prev_table = jQuery("#hidden-task-table").clone();
     rows = prev_table.find('> tbody > tr');

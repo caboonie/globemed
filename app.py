@@ -269,6 +269,18 @@ def task(task_id):
     return render_template("task.html", task=task, items_of_use=[get_inventory_item(item_id) for item_id in task.items_of_use], task_type=get_task_type_by_name(task.task_type), 
         units=UNITS,  name_to_item={item.name:item for item in get_inventory()})
 
+@app.route('/toggle_complete_task/<int:task_id>', methods = ['POST'])
+@check_login_wrapper
+def toggle_complete_task(task_id):
+    task=get_task(task_id)
+    if task == None:
+        return "task doesn't exist"
+    if (task.completed):
+        uncomplete_task(task_id)
+    else:
+        complete_task(task_id)
+    return "done"
+
 @app.route('/complete_task/<int:task_id>', methods = ['POST'])
 @check_login_wrapper
 def complete_task_page(task_id):
@@ -316,7 +328,17 @@ def add_task():
         task_type = get_task_type_by_name(task_type_name)
         due_date_str = request.form["due_date"]
         due_date = datetime.strptime(due_date_str, '%Y-%m-%d')
-        description = request.form["description"]
+        description = request.form['description']
+        patient_name = None
+        if 'patient_name' in request.form:
+            patient_name = request.form['patient_name']
+        birthdate = None
+        if 'birthdate' in request.form:
+            birthdate = request.form['birthdate']
+        dni = None
+        if 'dni' in request.form:
+            dni = request.form['dni']
+
         fields = {}
         reminders = []
         reminder_datestrings = []
@@ -336,13 +358,13 @@ def add_task():
                         flash("Nombre de un articulo inválido: " + request.form[field])
                     return render_template("add_task.html", task_types=get_task_types(), inventory=get_inventory(), units=UNITS)
                 items_of_use.append(inventory_item.id)
-            elif field not in ["task_type", "due_date", "description"] and "_other" not in field: # TODO - don't let the use make custom fields using these names
+            elif field not in ["task_type", "due_date", "description", "patient_name", "birthdate", "dni"] and "_other" not in field: # TODO - don't let the use make custom fields using these names
                 if request.form[field] == "Other":
                     fields[field] = request.form[field+"_other"]
                 else:
                     fields[field] = request.form[field]
 
-        succeeded, msg_eng, msg_spanish = create_task(get_user(login_session["username"]), due_date, description, task_type_name, fields, reminders, reminder_datestrings, items_of_use)
+        succeeded, msg_eng, msg_spanish = create_task(get_user(login_session["username"]), due_date, description, patient_name, birthdate, dni, task_type_name, fields, reminders, reminder_datestrings, items_of_use)
         if succeeded:
             flash("Task added successfully!" if login_session["language"] == "English" else "Tarea agregado exitosamente!")
         else:
